@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     View,
     StyleSheet,
@@ -9,9 +9,14 @@ import {
     from 'react-native';
 import NewsPost from '../components/news';
 import SliderComponent from '../components/sliderComponent';
-
+import { useDrawerProgress } from '@react-navigation/drawer'
 
 const HomeScreen = () => {
+    // const status = useDrawerProgress();
+    // useEffect(() => {
+
+    //     console.log(status)
+    // }, [status])
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
             <View style={styles.container}>
@@ -51,9 +56,9 @@ const styles = StyleSheet.create({
     },
     slider:
     {
-        flex:0.3,
-        width:"100%",
-        alignItems:'center'
+        flex: 0.3,
+        width: "100%",
+        alignItems: 'center'
     },
     news: {
 
