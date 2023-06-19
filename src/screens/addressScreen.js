@@ -1,357 +1,279 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Button,
-  Modal,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  ScrollView,
-} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import axios from 'axios';
+import Colors from '../constants/Colors';
 
-const AddressScreen = () => {
-  const [address, setAddress] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalData, setModalData] = useState({
-    addressType: '',
-    address: '',
-    country: '',
-    state: '',
-    city: '',
-    pincode: '',
-  });
+const AddressScreen = ({navigation}) => {
+  const studentId = 2;
+  const [addressList, setAddressList] = useState([]);
+  
+  useEffect(() => {
+    GetStudentAddressByStudentId();
+  }, []);
 
-  const handleModalOpen = () => {
-    setModalData({
-      addressType: '',
-      address: '',
-      country: '',
-      state: '',
-      city: '',
-      pincode: '',
-    });
-    setModalVisible(true);
-  };
+  const GetStudentAddressByStudentId = () => {
+    axios.get(`http://192.168.1.7:5291/api/StudentAddress/getStudentAddressbyStudentId?Id=${studentId}`, {
+      headers: {
+        'Content-Type': 'application/json', // Example header
+        'User-Agent': 'react-native/0.64.2', // Example User-Agent header
+      },
+    })
+      .then((response) => {
+        console.log(response.data);
+        setAddressList(response.data);
+      })
+      .catch((error) => {
+        console.error(error, "Get Student Address By Student Id Error");
+      });
+  }
 
-  const handleModalClose = () => {
-    setModalVisible(false);
-  };
+  const handleDeleteStudentAddress= (id) => {
+    axios.delete(`http://192.168.1.7:5291/api/StudentAddress/delete?Id=${id}`)
+      .then((result) => {
+        console.log(result);
+        GetStudentAddressByStudentId();
+      })
+      .catch(err => console.error("Delete Error", err));
+  }
 
-  const handleModalSave = () => {
-    if (modalData.address) {
-      // Editing existing Address
-      const updatedAddress = [...address];
-      updatedAddress[modalData.index] = { ...modalData };
-      setAddress(updatedAddress);
-    } else {
-      // Adding new Address
-      const newAddress = { ...modalData };
-      setAddress([...address, newAddress]);
-    }
-    setModalVisible(false);
-  };
+  const handleAddAddressNavigate = () => {
+    navigation.navigate('AddressFormScreen')
+  }
 
-  const handleEditAddress = (index) => {
-    const addressItem = address[index];
-    setModalData({ ...addressItem, index });
-    setModalVisible(true);
-  };
-
-  const renderDropdownOption = (item) => {
-    return (
-      <TouchableOpacity
-        style={styles.dropdownOption}
-        onPress={() => handleDropdownSelect(item)}
-      >
-        <Text>{item}</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const handleDropdownOpen = (fieldName) => {
-    let dropdownOptions = [];
-
-    switch (fieldName) {
-      case 'addressType':
-        dropdownOptions = ['Home', 'Work', 'Other'];
-        break;
-      case 'country':
-        dropdownOptions = ['USA', 'Canada', 'UK', 'Australia'];
-        break;
-      case 'state':
-        dropdownOptions = ['California', 'New York', 'Texas', 'Florida'];
-        break;
-      case 'city':
-        dropdownOptions = ['Los Angeles', 'New York City', 'Houston', 'Miami'];
-        break;
-      default:
-        dropdownOptions = [];
-    }
-
-    setDropdownOptions(dropdownOptions);
-    setSelectedDropdownField(fieldName);
-    setDropdownVisible(true);
-  };
-
-  const handleDropdownClose = () => {
-    setDropdownVisible(false);
-    setSelectedDropdownField('');
-    setDropdownOptions([]);
-  };
-
-  const handleDropdownSelect = (value) => {
-    setModalData({ ...modalData, [selectedDropdownField]: value });
-    handleDropdownClose();
-  };
-
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [dropdownOptions, setDropdownOptions] = useState([]);
-  const [selectedDropdownField, setSelectedDropdownField] = useState('');
-
-  const renderDropdown = () => {
-    if (!dropdownVisible) return null;
-    return (
-      <View style={styles.dropdownContainer}>
-        <ScrollView style={styles.dropdownList}>
-          {dropdownOptions.map((option) => renderDropdownOption(option))}
-        </ScrollView>
+  const renderTokenCard = ({ item }) => (
+    <View style={{
+      justifyContent: 'space-between',
+      backgroundColor: Colors.background,
+      borderRadius: 10,
+      padding: 10,
+      marginBottom: 10,
+      marginTop: 10,
+      shadowColor: Colors.shadow,
+      shadowOffset: { width: 10, height: 2 },
+      shadowOpacity: 4,
+      shadowRadius: 10,
+      elevation: 10,
+      borderWidth: 0.5,
+      borderColor: Colors.primary,
+    }}>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Address Type : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.addressType}</Text>
       </View>
-    );
-  };
-
-  const renderItem = ({ item, index }) => (
-    <AddressCard address={item} onEdit={() => handleEditAddress(index)} />
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Address : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.address}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Country : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.country}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>State : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.state}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>City : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.city}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Pincode : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.pincode}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        <TouchableOpacity style={{
+          backgroundColor: '#5a67f2',
+          borderRadius: 5,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          marginRight: 10,
+        }} onPress={() => handleEditStudentToken(item.id)}>
+          <Text style={{
+            color: Colors.background,
+            fontSize: 14,
+            fontWeight: 'bold',
+          }}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{
+          backgroundColor: '#f25252',
+          borderRadius: 5,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+        }} onPress={() => handleDeleteStudentAddress(item.id)}>
+          <Text style={{
+            color: Colors.background,
+            fontSize: 14,
+            fontWeight: 'bold',
+          }}>Delete</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Address</Text>
-      <Button title="Add" onPress={handleModalOpen} />
-
-      <FlatList
-        data={address}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-      />
-
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.formContainer}>
-            <View style={styles.cardContainer}>
-              <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <Text style={styles.modalTitle}>Address Details</Text>
-                <TouchableOpacity
-                  style={styles.dropdownInput}
-                  onPress={() => handleDropdownOpen('addressType')}
-                >
-                  <Text>{modalData.addressType || 'Select Address Type'}</Text>
-                </TouchableOpacity>
-                {renderDropdown()}
-
-                <TextInput
-                  style={styles.input}
-                  value={modalData.address}
-                  onChangeText={(text) =>
-                    setModalData({ ...modalData, address: text })
-                  }
-                  placeholder="Address"
-                />
-
-                <TouchableOpacity
-                  style={styles.dropdownInput}
-                  onPress={() => handleDropdownOpen('country')}
-                >
-                  <Text>{modalData.country || 'Select Country'}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.dropdownInput}
-                  onPress={() => handleDropdownOpen('state')}
-                >
-                  <Text>{modalData.state || 'Select State'}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.dropdownInput}
-                  onPress={() => handleDropdownOpen('city')}
-                >
-                  <Text>{modalData.city || 'Select City'}</Text>
-                </TouchableOpacity>
-
-                <TextInput
-                  style={styles.input}
-                  value={modalData.pincode}
-                  onChangeText={(text) =>
-                    setModalData({ ...modalData, pincode: text })
-                  }
-                  placeholder="Pincode"
-                  keyboardType="numeric"
-                />
-
-                <View style={styles.buttonContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleModalSave}
-                  >
-                    <Text style={styles.buttonText}>
-                      {modalData.address ? 'Save' : 'Add'}
-                    </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleModalClose}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </View>
-          </View>
-        </View>
-      </Modal>
-      
-    </View>
+    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <View style={{
+        padding: 16,
+        justifyContent: 'center'
+      }}>
+        <TouchableOpacity style={{
+          backgroundColor: Colors.primary,
+          borderRadius: 5,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+          marginBottom: 20,
+        }} onPress={handleAddAddressNavigate}>
+          <Text style={{
+            color: Colors.background,
+            fontSize: 14,
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>Add Address</Text>
+        </TouchableOpacity>
+        <FlatList
+          data={addressList}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderTokenCard}
+        />
+      </View>
+    </ScrollView>
   );
 };
-
-const AddressCard = ({ address, onEdit }) => {
-  return (
-    <View style={styles.card}>
-      <Text style={styles.label}>Address Type =&gt; {address.addressType}</Text>
-      <Text style={styles.label}>Address =&gt; {address.address}</Text>
-      <Text style={styles.label}>Country =&gt; {address.country}</Text>
-      <Text style={styles.label}>State =&gt; {address.state}</Text>
-      <Text style={styles.label}>City =&gt; {address.city}</Text>
-      <Text style={styles.label}>Pincode =&gt; {address.pincode}</Text>
-      <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  formContainer: {
-    padding: 20,
-    width: '80%',
-    borderRadius: 5,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 10,
-    fontSize: 16,
-  },
-  dropdownContainer: {
-    position: 'absolute',
-    top: 100,
-    left: 20,
-    right: 20,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    maxHeight: 200,
-    elevation: 3,
-  },
-  dropdownList: {
-    padding: 10,
-  },
-  dropdownOption: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  dropdownInput: {
-    borderWidth: 1,
-    borderColor: 'black',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 10,
-    fontSize: 16,
-    justifyContent: 'center',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  button: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-    marginHorizontal: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  cardContainer: {
-    backgroundColor: 'lightblue',
-    borderRadius: 8,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  card: {
-    backgroundColor: 'lightpink',
-    borderRadius: 15,
-    padding: 16,
-    shadowColor: 'red',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 5,
-    shadowRadius: 4,
-    elevation: 4,
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  label: {
-    fontSize: 20,
-    marginBottom: 5,
-    color: 'black',
-  },
-  editButton: {
-    backgroundColor: 'lightblue',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    alignItems: 'center',
-  },
-  editButtonText: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-});
 
 export default AddressScreen;
+
+// const styles = StyleSheet.create({
+//   container: {
+//     backgroundColor: 'white',
+//     padding: 16,
+//     justifyContent: 'center'
+//   },
+//   dropdown: {
+//     height: 50,
+//     borderColor: 'gray',
+//     borderWidth: 0.5,
+//     borderRadius: 8,
+//     paddingHorizontal: 8,
+//   },
+//   addButton: {
+//     backgroundColor: '#5a67f2',
+//     borderRadius: 5,
+//     paddingVertical: 8,
+//     paddingHorizontal: 12,
+//     marginTop: 10,
+//     alignSelf: 'flex-start',
+//   },
+//   addButtonText: {
+//     color: '#ffffff',
+//     fontSize: 14,
+//     fontWeight: 'bold',
+//   },
+//   icon: {
+//     marginRight: 5,
+//   },
+//   label: {
+//     position: 'absolute',
+//     backgroundColor: 'white',
+//     left: 22,
+//     top: 8,
+//     zIndex: 999,
+//     paddingHorizontal: 8,
+//     fontSize: 14,
+//   },
+//   placeholderStyle: {
+//     fontSize: 16,
+//   },
+//   selectedTextStyle: {
+//     fontSize: 16,
+//   },
+//   iconStyle: {
+//     width: 20,
+//     height: 20,
+//   },
+//   inputSearchStyle: {
+//     height: 40,
+//     fontSize: 16,
+//   },
+//   addressCard: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'space-between',
+//     backgroundColor: '#ccc',
+//     borderRadius: 10,
+//     padding: 20,
+//     marginBottom: 10,
+//     marginTop: 10,
+//     shadowColor: '#000000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.2,
+//     shadowRadius: 4,
+//     elevation: 4,
+//   },
+//   addressName: {
+//     fontSize: 16,
+//     fontWeight: 'bold',
+//   },
+//   buttonContainer: {
+//     flexDirection: 'row',
+//   },
+//   editButton: {
+//     backgroundColor: '#5a67f2',
+//     borderRadius: 5,
+//     paddingVertical: 8,
+//     paddingHorizontal: 12,
+//     marginRight: 10,
+//   },
+//   deleteButton: {
+//     backgroundColor: '#f25252',
+//     borderRadius: 5,
+//     paddingVertical: 8,
+//     paddingHorizontal: 12,
+//   },
+//   buttonText: {
+//     color: '#ffffff',
+//     fontSize: 14,
+//     fontWeight: 'bold',
+//   },
+//   modalContainer: {
+//     flex: 1,
+//     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   modalCard: {
+//     backgroundColor: '#ffffff',
+//     borderRadius: 10,
+//     padding: 20,
+//     width: '80%',
+//   },
+//   modalTextInput: {
+//     borderWidth: 1,
+//     borderColor: 'gray',
+//     borderRadius: 8,
+//     padding: 8,
+//     marginBottom: 20,
+//   },
+//   modalButtonContainer: {
+//     marginTop: 10,
+//     flexDirection: 'row',
+//     justifyContent: 'flex-end',
+//   },
+//   modalSaveButton: {
+//     backgroundColor: '#5a67f2',
+//     borderRadius: 5,
+//     paddingVertical: 8,
+//     paddingHorizontal: 12,
+//   },
+//   modalCancelButton: {
+//     backgroundColor: '#f25252',
+//     borderRadius: 5,
+//     paddingVertical: 8,
+//     paddingHorizontal: 12,
+//     marginLeft: 10
+//   },
+//   modalButtonText: {
+//     color: '#ffffff',
+//     fontSize: 14,
+//     fontWeight: 'bold',
+//   },
+// });

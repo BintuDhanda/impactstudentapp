@@ -5,7 +5,8 @@ import axios from 'axios';
 import Colors from '../constants/Colors';
 
 const TokenScreen = () => {
-  const [token, setToken] = useState({ "Id": 0, "StudentId": "", "IsActive": true, "BatchId": "" });
+  const studentId = 2
+  const [token, setToken] = useState({ "Id": 0, "StudentId": studentId, "IsActive": false, "BatchId": "" , "CreatedAt": ""});
   const [courseCategoryList, setCourseCategoryList] = useState([]);
   const [courseList, setCourseList] = useState([]);
   const [batchList, setBatchList] = useState([]);
@@ -18,10 +19,26 @@ const TokenScreen = () => {
 
   console.log(courseCategoryList, "CourseCategoryList")
   useEffect(() => {
-    GetCounseCategoryList();
+    GetCourseCategoryList();
+    GetStudentTokenByStudentId();
   }, []);
 
-  const GetCounseCategoryList = () => {
+  const GetStudentTokenByStudentId = async () => {
+    try {
+      console.log(studentId, "studentId")
+      const response = await axios.get(`http://192.168.1.7:5291/api/StudentToken/getStudentTokenByStudentId?StudentId=${studentId}`, {
+        headers: {
+          'Content-Type': 'application/json', // Example header
+          'User-Agent': 'react-native/0.64.2', // Example User-Agent header
+        },
+      });
+      setTokenList(response.data);
+    } catch (error) {
+      console.error('Error fetching Student Token List:', error);
+    }
+  };
+
+  const GetCourseCategoryList = () => {
     axios.get('http://192.168.1.7:5291/api/CourseCategory/get', {
       headers: {
         'Content-Type': 'application/json', // Example header
@@ -33,13 +50,13 @@ const TokenScreen = () => {
         setCourseCategoryList(response.data);
       })
       .catch((error) => {
-        console.log(error, "Get CourseCategory List Error");
+        console.error(error, "Get CourseCategory List Error");
       });
   }
 
   const fetchCourseByCourseCategoryId = async (courseCategoryId) => {
     try {
-        console.log(courseCategoryId, "courseCategoryId")
+      console.log(courseCategoryId, "courseCategoryId")
       const response = await axios.get(`http://192.168.1.7:5291/api/Course/getCourseByCourseCategoryId?Id=${courseCategoryId}`, {
         headers: {
           'Content-Type': 'application/json', // Example header
@@ -54,7 +71,7 @@ const TokenScreen = () => {
 
   const fetchBatchByCourseId = async (courseId) => {
     try {
-        console.log(courseId, "courseCategoryId")
+      console.log(courseId, "courseCategoryId")
       const response = await axios.get(`http://192.168.1.7:5291/api/Batch/getBatchByCourseId?Id=${courseId}`, {
         headers: {
           'Content-Type': 'application/json', // Example header
@@ -70,33 +87,41 @@ const TokenScreen = () => {
     setValue(courseCategory.id);
     fetchCourseByCourseCategoryId(courseCategory.id);
   };
-  
+
   const handleCourseSelect = (course) => {
     setCourseValue(course.id);
     fetchBatchByCourseId(course.id);
   };
 
+  const handleBatchSelect = (batch) => {
+    setToken({ ...token, BatchId: batch.id })
+    setBatchValue(batch.id)
+  }
 
   const handleAddToken = () => {
     setToken({
       Id: 0,
-      StudentId: "",
-      IsActive: true,
-      BatchId: ""
+      StudentId: studentId,
+      IsActive: false,
+      BatchId: "",
     });
+    setValue(null)
+    setCourseValue(null)
+    setBatchValue(null)
     setModalVisible(true);
   };
 
-  const handleEditToken = (id) => {
-    axios.get(`http://192.168.1.7:5291/api/Token/getById?Id=${id}`)
+  const handleEditStudentToken = (id) => {
+    axios.get(`http://192.168.1.7:5291/api/StudentToken/getById?Id=${id}`)
       .then((result) => {
-        console.log(result);
+        console.log(result.data, "Student Token get By id");
         setToken(
           {
             Id: result.data.id,
             StudentId: result.data.studentId,
             BatchId: result.data.batchId,
-            IsActive: result.data.isActive
+            IsActive: result.data.isActive,
+            CreatedAt: result.data.createdAt,
           }
         );
       })
@@ -105,10 +130,10 @@ const TokenScreen = () => {
   };
 
   const handleDeleteToken = (id) => {
-    axios.delete(`http://192.168.1.7:5291/api/Token/delete?Id=${id}`)
+    axios.delete(`http://192.168.1.7:5291/api/StudentToken/delete?Id=${id}`)
       .then((result) => {
         console.log(result);
-        fetchTokensByAccCategoryId(result.data.accCategoryId)
+        GetStudentTokenByStudentId();
       })
       .catch(err => console.error("Delete Error", err));
   }
@@ -116,6 +141,7 @@ const TokenScreen = () => {
   const handleSaveToken = async () => {
     try {
       if (token.Id !== 0) {
+        console.log(token, "Set Token")
         await axios.put(`http://192.168.1.7:5291/api/StudentToken/put`, JSON.stringify(token), {
           headers: {
             'Content-Type': 'application/json'
@@ -123,18 +149,20 @@ const TokenScreen = () => {
         })
           .then((response) => {
             if (response.status === 200) {
-              fetchTokensByAccCategoryId(response.data.accCategoryId);
+              GetStudentTokenByStudentId();
               Alert.alert('Sucess', 'StudentToken Update successfully');
               setToken({
                 "Id": 0,
                 "StudentId": "",
                 "BatchId": "",
-                "IsActive": true
+                "IsActive": false,
+                "CreatedAt": ""
               });
             }
           })
-          .catch(err => console.error("Post error in Token", err));
+          .catch(err => console.error("Update error in Student Token", err));
       } else {
+        console.log(token, "student Token")
         await axios.post('http://192.168.1.7:5291/api/StudentToken/post', JSON.stringify(token), {
           headers: {
             'Content-Type': 'application/json'
@@ -142,22 +170,32 @@ const TokenScreen = () => {
         })
           .then((response) => {
             if (response.status === 200) {
-              fetchTokensByAccCategoryId(response.data.accCategoryId);
+              GetStudentTokenByStudentId();
               Alert.alert('Sucess', 'StudentToken is Added Successfully')
               setToken({
                 "Id": 0,
                 "StudentId": "",
                 "BatchId": "",
-                "IsActive": true
+                "IsActive": false,
+                "CreatedAt": ""
               });
             }
           })
       }
       setModalVisible(false);
     } catch (error) {
-      console.log('Error saving Token:', error);
+      console.error('Error saving Token:', error);
     }
   };
+
+  const getFormattedDate = (datestring) => {
+    const datetimeString = datestring;
+    const date = new Date(datetimeString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+}
 
   const handleCloseModal = () => {
     setModalVisible(false);
@@ -166,8 +204,6 @@ const TokenScreen = () => {
 
   const renderTokenCard = ({ item }) => (
     <View style={{
-      flexDirection: 'row',
-      alignItems: 'center',
       justifyContent: 'space-between',
       backgroundColor: Colors.background,
       borderRadius: 10,
@@ -182,18 +218,30 @@ const TokenScreen = () => {
       borderWidth: 0.5,
       borderColor: Colors.primary,
     }}>
-      <Text style={{
-        fontSize: 16,
-        fontWeight: 'bold',
-      }}>{item.tokenName}</Text>
       <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Batch Name : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.batchName}</Text>
+      </View>
+      {item.validFrom === null ? null : (<View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Valid From : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{getFormattedDate(item.validFrom)}</Text>
+      </View>) }
+      {item.validUpto === null ? null : (<View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Valid UpTo : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{getFormattedDate(item.validUpto)}</Text>
+      </View>)}
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Token Status : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.isActive === true ? "Active" : "InActive"}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <TouchableOpacity style={{
           backgroundColor: '#5a67f2',
           borderRadius: 5,
           paddingVertical: 8,
           paddingHorizontal: 12,
           marginRight: 10,
-        }} onPress={() => handleEditToken(item.id)}>
+        }} onPress={() => handleEditStudentToken(item.id)}>
           <Text style={{
             color: Colors.background,
             fontSize: 14,
@@ -223,11 +271,11 @@ const TokenScreen = () => {
         justifyContent: 'center'
       }}>
         <TouchableOpacity style={{
-         backgroundColor: Colors.primary,
-         borderRadius: 5,
-         paddingVertical: 10,
-         paddingHorizontal: 20,
-         marginBottom: 20,
+          backgroundColor: Colors.primary,
+          borderRadius: 5,
+          paddingVertical: 10,
+          paddingHorizontal: 20,
+          marginBottom: 20,
         }} onPress={handleAddToken}>
           <Text style={{
             color: Colors.background,
@@ -278,9 +326,9 @@ const TokenScreen = () => {
                   data={courseCategoryList}
                   search
                   maxHeight={300}
-                  labelField= "courseCategoryName"
-                  valueField= "id"
-                  placeholder={!isFocus ? 'Select Token Category' : '...'}
+                  labelField="courseCategoryName"
+                  valueField="id"
+                  placeholder={!isFocus ? 'Select Course Category' : '...'}
                   searchPlaceholder="Search..."
                   value={value}
                   onFocus={() => setIsFocus(true)}
@@ -309,9 +357,9 @@ const TokenScreen = () => {
                   data={courseList}
                   search
                   maxHeight={300}
-                  labelField= "courseName"
-                  valueField= "id"
-                  placeholder={!isFocus ? 'Select Token Category' : '...'}
+                  labelField="courseName"
+                  valueField="id"
+                  placeholder={!isFocus ? 'Select Course' : '...'}
                   searchPlaceholder="Search..."
                   value={courseValue}
                   onFocus={() => setIsFocus(true)}
@@ -339,14 +387,14 @@ const TokenScreen = () => {
                   data={batchList}
                   search
                   maxHeight={300}
-                  labelField= "batchName"
-                  valueField= "id"
-                  placeholder={!isFocus ? 'Select Token Category' : '...'}
+                  labelField="batchName"
+                  valueField="id"
+                  placeholder={!isFocus ? 'Select Batch' : '...'}
                   searchPlaceholder="Search..."
-                  value={batchList.id}
+                  value={batchValue}
                   onFocus={() => setIsFocus(true)}
                   onBlur={() => setIsFocus(false)}
-                  onChange={(value) => (setToken({...token, BatchId: value}))}
+                  onChange={handleBatchSelect}
                 />
                 <View style={{
                   marginTop: 10,

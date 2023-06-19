@@ -5,7 +5,7 @@ import HomeScreen from '../screens/home';
 import StudentFormScreen from '../screens/studentFormScreen';
 import ProfileScreen from '../screens/profileScreen';
 import QualificationScreen from '../screens/qualificationScreen';
-import AddressScreen from '../screens/addressScreen';
+import AddressScreen from '../screens/addressFormScreen';
 
 
 const Drawer = createDrawerNavigator();
