@@ -26,8 +26,10 @@ import ProfileScreen from './src/screens/profileScreen';
 import Colors from './src/constants/Colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import TokenScreen from './src/screens/tokenScreen';
-import AddressFormScreen from './src/screens/addressFormScreen';
-import AddressScreen from './src/screens/addressScreen';
+import AddressFormScreen from './src/screens/address/addressFormScreen';
+import AddressScreen from './src/screens/address/addressScreen';
+import QualificationScreen from './src/screens/qualification/qualificationScreen';
+import QualificationFormScreen from './src/screens/qualification/qualificationFormScreen';
 
 
 let isLogedIn = true;
@@ -35,108 +37,101 @@ let isLogedIn = true;
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function App() {
+function MainTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: Colors.accent,
+        tabBarInactiveTintColor: 'gray',
+        tabBarShowLabel: true,
+        tabBarStyle: {
+          backgroundColor: Colors.background,
+          borderTopWidth: 1,
+          borderTopColor: 'lightgray',
+        },
+      }}>
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="home" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="user" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Token"
+        component={TokenScreen}
+        options={{
+          tabBarLabel: 'Token',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="certificate" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Address"
+        component={AddressScreen}
+        options={{
+          tabBarLabel: 'Address',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="map-marker" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Qualification"
+        component={QualificationScreen}
+        options={{
+          tabBarLabel: 'Qualification',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="graduation-cap" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      {/* <Tab.Screen
+        name="Batch"
+        component={{ AddressScreen }}
+        options={{
+          tabBarLabel: 'Batch',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="users" color={Colors.primary} size={30} />
+          ),
+        }}
+      /> */}
+    </Tab.Navigator>
+  );
+}
 
+function App() {
+  const showTab = false;
   return (
     <>
       {isLogedIn ? (
         <NavigationContainer>
-          <Tab.Navigator screenOptions={{
-            tabBarActiveTintColor: Colors.accent,
-            tabBarInactiveTintColor: 'gray',
-            tabBarShowLabel: true,
-            tabBarStyle: {
-              backgroundColor: Colors.background,
-              borderTopWidth: 1,
-              borderTopColor: 'lightgray',
-            },
-          }}>
-            <Tab.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{
-                tabBarLabel: 'Home',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="home" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Profile"
-              component={ProfileScreen}
-              options={{
-                tabBarLabel: 'Profile',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="user" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Token"
-              component={TokenScreen}
-              options={{
-                tabBarLabel: 'Token',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="certificate" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="AddressForm"
-              component={AddressFormScreen}
-              options={{
-                tabBarLabel: 'Address Form',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="map-marker" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Address"
-              component={AddressScreen}
-              options={{
-                tabBarLabel: 'Address',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="map-marker" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            {/* <Tab.Screen
-              name="Qualification"
-              component={{ AddressScreen }}
-              options={{
-                tabBarLabel: 'Qualification',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="graduation-cap" color={Colors.primary} size={30} />
-                ),
-              }}
-            />
-            <Tab.Screen
-              name="Batch"
-              component={{ AddressScreen }}
-              options={{
-                tabBarLabel: 'Batch',
-                tabBarLabelStyle: { fontSize: 15 },
-                tabBarIcon: ({ color, size }) => (
-                  <Icon name="users" color={Colors.primary} size={30} />
-                ),
-              }}
-            /> */}
-            {/* <Tab.Screen name='Profile' component={ProfileScreen} /> */}
-          </Tab.Navigator>
+          <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Main" component={MainTabNavigator} />
+            <Stack.Screen name="AddressForm" component={AddressFormScreen} />
+            <Stack.Screen name="QualificationForm" component={QualificationFormScreen} />
+          </Stack.Navigator>
         </NavigationContainer>
-
-        // <NavigationContainer>
-        //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-        //     <Stack.Screen name="Home" component={DrawerNavigator} />          
-        //   </Stack.Navigator>
-        // </NavigationContainer>
       )
         :
         (<NavigationContainer>

@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
-import Colors from '../constants/Colors';
+import Colors from '../../constants/Colors';
 import { Dropdown } from 'react-native-element-dropdown';
 import axios from 'axios';
 
 const AddressFormScreen = ({ route, navigation }) => {
 
-  // const { userId, studentId } = route.params;
-  const studentId = 2;
+  const { addressId, studentId } = route.params;
   const [studentAddress, setStudentAddress] = useState({
     "Id": 0,
     "AddressTypeId": "",
@@ -18,7 +17,7 @@ const AddressFormScreen = ({ route, navigation }) => {
     "Pincode": "",
     "StudentId": studentId,
     "IsActive": true,
-    // "CreatedAt": ""
+    "CreatedAt": null
   });
   const [addressTypeList, setAddressTypeList] = useState([]);
   const [countryList,setCountryList] = useState([]);
@@ -30,12 +29,23 @@ const AddressFormScreen = ({ route, navigation }) => {
   const [cityValue, setCityValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
-  console.log(studentAddress, "StudentAddress")
-
   useEffect(() => {
-    GetAddressTypeList();
-    GetCountryList();
+    if(addressTypeList.length === 0){
+      GetAddressTypeList();
+    }
   }, [])
+
+  useEffect(()=>{
+    if(countryList.length === 0){
+      GetCountryList();
+    }
+  },[])
+
+  useEffect(()=>{
+    if(addressId !== undefined){
+      GetAddressById();
+    }
+  },[addressId])
 
   const handleInputChange = (name, value) => {
     setStudentAddress((prevStudentAddress) => ({
@@ -43,6 +53,28 @@ const AddressFormScreen = ({ route, navigation }) => {
       [name]: value,
     }));
   };
+
+  const GetAddressById = () => {
+    axios.get(`http://192.168.1.7:5291/api/StudentAddress/getById?Id=${addressId}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then((response)=>{
+      setStudentAddress({
+        Id: response.data.id,
+        AddressTypeId: response.data.addressTypeId,
+        Address: response.data.address,
+        CountryId: response.data.countryId,
+        StateId: response.data.stateId,
+        CityId: response.data.cityId,
+        Pincode: response.data.pincode,
+        StudentId: response.data.studentId,
+        IsActive: response.data.isActive,
+        CreatedAt: response.data.createdAt
+      })
+    })
+  }
 
   const GetAddressTypeList = () => {
     axios.get('http://192.168.1.7:5291/api/AddressType/get', {
@@ -68,7 +100,6 @@ const AddressFormScreen = ({ route, navigation }) => {
       },
     })
       .then((response) => {
-        console.log(response.data);
         setCountryList(response.data);
       })
       .catch((error) => {
@@ -77,7 +108,6 @@ const AddressFormScreen = ({ route, navigation }) => {
   }
 
   const fetchStateByCountryId = async (countryId) => {
-    console.log(countryId, "CountryId")
     await axios.get(`http://192.168.1.7:5291/api/State/getStateByCountryId?Id=${countryId}`,{
       headers:{
         'Content-Type': 'application/json'
@@ -130,6 +160,18 @@ const AddressFormScreen = ({ route, navigation }) => {
           .then((response) => {
             if (response.status === 200) {
               Alert.alert('Success', 'Update Address Successfully')
+              setStudentAddress({
+                "Id": 0,
+                "AddressTypeId": "",
+                "Address": "",
+                "CountryId": "",
+                "StateId": "",
+                "CityId": "",
+                "Pincode": "",
+                "StudentId": studentId,
+                "IsActive": true,
+                "CreatedAt": null
+              })
               navigation.goBack();
             }
           })
@@ -144,6 +186,18 @@ const AddressFormScreen = ({ route, navigation }) => {
           .then((response) => {
             if (response.status === 200) {
               Alert.alert('Success', 'Add Address Successfully')
+              setStudentAddress({
+                "Id": 0,
+                "AddressTypeId": "",
+                "Address": "",
+                "CountryId": "",
+                "StateId": "",
+                "CityId": "",
+                "Pincode": "",
+                "StudentId": studentId,
+                "IsActive": true,
+                "CreatedAt": null
+              })
               navigation.navigate('Home')
             }
           })
@@ -156,6 +210,18 @@ const AddressFormScreen = ({ route, navigation }) => {
   }
 
   const handleCancel = () => {
+    setStudentAddress({
+      "Id": 0,
+      "AddressTypeId": "",
+      "Address": "",
+      "CountryId": "",
+      "StateId": "",
+      "CityId": "",
+      "Pincode": "",
+      "StudentId": studentId,
+      "IsActive": true,
+      "CreatedAt": null
+    })
     navigation.goBack();
   }
   return (
@@ -171,7 +237,7 @@ const AddressFormScreen = ({ route, navigation }) => {
         elevation: 2,
       }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, }}>Student Form</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, }}>Address Form</Text>
           <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Address Type:</Text>
           <Dropdown
             style={[{
