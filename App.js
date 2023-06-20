@@ -30,6 +30,7 @@ import AddressFormScreen from './src/screens/address/addressFormScreen';
 import AddressScreen from './src/screens/address/addressScreen';
 import QualificationScreen from './src/screens/qualification/qualificationScreen';
 import QualificationFormScreen from './src/screens/qualification/qualificationFormScreen';
+import BatchScreen from './src/screens/studentBatch/batchScreen';
 
 
 let isLogedIn = true;
@@ -105,9 +106,9 @@ function MainTabNavigator() {
           ),
         }}
       />
-      {/* <Tab.Screen
+      <Tab.Screen
         name="Batch"
-        component={{ AddressScreen }}
+        component={BatchScreen}
         options={{
           tabBarLabel: 'Batch',
           tabBarLabelStyle: { fontSize: 15 },
@@ -115,7 +116,7 @@ function MainTabNavigator() {
             <Icon name="users" color={Colors.primary} size={30} />
           ),
         }}
-      /> */}
+      />
     </Tab.Navigator>
   );
 }
