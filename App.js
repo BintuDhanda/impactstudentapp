@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -12,7 +12,7 @@ import 'react-native-gesture-handler'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import LogIn from './src/screens/login';
+import LogIn from './src/screens/loginScreen';
 import VerifyOTP from './src/screens/verifyotp'
 import Register from './src/screens/register'
 
@@ -31,10 +31,12 @@ import AddressScreen from './src/screens/address/addressScreen';
 import QualificationScreen from './src/screens/qualification/qualificationScreen';
 import QualificationFormScreen from './src/screens/qualification/qualificationFormScreen';
 import BatchScreen from './src/screens/studentBatch/batchScreen';
+import NewsScreen from './src/screens/news/newsScreen';
 
 
 let isLogedIn = true;
 
+export const UserContext = React.createContext();
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -122,30 +124,64 @@ function MainTabNavigator() {
 }
 
 function App() {
+  const [user, setUser] = useState();
+  const [isSpalsh, setIsSplash] = useState(true);
+
+  useEffect(() => {
+    getUser();
+    setTimeout(() => {
+      setIsSplash(false);
+    }, 2000);
+  }, [])
+
+  const getUser = async () => {
+    try {
+      const user = await AsyncStorage.getItem('user');
+      if (user !== null) {
+        // We have data!!
+        console.log(user);
+        setUser(JSON.parse(user))
+      }
+    } catch (error) {
+      // Error retrieving data
+      console.log(error);
+    }
+  }
   const showTab = false;
   return (
     <>
-      {isLogedIn ? (
-        <NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Main" component={MainTabNavigator} />
-            <Stack.Screen name="AddressForm" component={AddressFormScreen} />
-            <Stack.Screen name="QualificationForm" component={QualificationFormScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      )
+      {isSpalsh ? (<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.primary }}>
+        {/* <Image source={require('../assets/impact.png')} /> */}
+        <Text style={{ fontSize: 60, color: Colors.background, fontWeight: 'bold' }}>IMPACT</Text>
+        <Text style={{ fontSize: 60, color: Colors.background, fontWeight: 'bold' }}>ACADEMY</Text>
+      </View>)
         :
-        (<NavigationContainer>
-          <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="login" component={LogIn} />
-            <Stack.Screen name="VerifyOTP" component={VerifyOTP} />
-            <Stack.Screen name="register" component={Register} />
-            <Stack.Screen name="setPassword" component={SetPassword} />
-            <Stack.Screen name="forgotPassword" component={ForgotPassword} />
-            <Stack.Screen name="forgotVerifyOtp" component={ForgotVerifyOtp} />
-            <Stack.Screen name="forgotSetPassword" component={ForgotSetPassword} />
-          </Stack.Navigator>
-        </NavigationContainer>)
+        (<UserContext.Provider value={{ user, setUser }}>
+          <SafeAreaView style={{ flex: 1 }}>
+            {user ? (
+              <NavigationContainer>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="Main" component={MainTabNavigator} />
+                  <Stack.Screen name="AddressForm" component={AddressFormScreen} />
+                  <Stack.Screen name="QualificationForm" component={QualificationFormScreen} />
+                </Stack.Navigator>
+              </NavigationContainer>
+            )
+              :
+              (<NavigationContainer>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="login" component={LogIn} />
+                  <Stack.Screen name="VerifyOTP" component={VerifyOTP} />
+                  <Stack.Screen name="register" component={Register} />
+                  <Stack.Screen name="setPassword" component={SetPassword} />
+                  <Stack.Screen name="forgotPassword" component={ForgotPassword} />
+                  <Stack.Screen name="forgotVerifyOtp" component={ForgotVerifyOtp} />
+                  <Stack.Screen name="forgotSetPassword" component={ForgotSetPassword} />
+                </Stack.Navigator>
+              </NavigationContainer>)
+            }
+          </SafeAreaView>
+        </UserContext.Provider>)
       }
     </>
   );
