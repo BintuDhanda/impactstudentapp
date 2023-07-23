@@ -19,9 +19,8 @@ const SliderComponent = () => {
         resizeMode="contain"
         imageLoadingColor="#2196F3"
         dotColor="red"
-        dotStyle={{height:20,width:20,borderRadius: 50}}
+        dotStyle={{height:10,width:10,borderRadius: 50}}
         inactiveDotColor="black"
-        onCurrentImagePressed={(index)=> alert(index+1)}
         firstItem={4}
         paginationBoxVerticalPadding={10}
       />

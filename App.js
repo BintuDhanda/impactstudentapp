@@ -15,9 +15,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import LogIn from './src/screens/loginScreen';
 import VerifyOTP from './src/screens/verifyotp'
 import Register from './src/screens/register'
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import DrawerNavigator from './src/navigation/DrawerNavigator';
-import SetPassword from './src/screens/setPassword';
 import ForgotPassword from './src/screens/forgotPassword';
 import ForgotVerifyOtp from './src/screens/forgotVerifyOtp';
 import ForgotSetPassword from './src/screens/forgotSetPassword';
@@ -25,13 +24,16 @@ import HomeScreen from './src/screens/home';
 import ProfileScreen from './src/screens/profileScreen';
 import Colors from './src/constants/Colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import TokenScreen from './src/screens/tokenScreen';
-import AddressFormScreen from './src/screens/address/addressFormScreen';
-import AddressScreen from './src/screens/address/addressScreen';
-import QualificationScreen from './src/screens/qualification/qualificationScreen';
-import QualificationFormScreen from './src/screens/qualification/qualificationFormScreen';
-import BatchScreen from './src/screens/studentBatch/batchScreen';
-import NewsScreen from './src/screens/news/newsScreen';
+import RegisterVerifyOtpScreen from './src/screens/registerVerifyOtpScreen';
+import NewsLikeScreen from './src/screens/news/newsLikeScreen';
+import NewsCommentScreen from './src/screens/news/newsCommentScreen';
+import StudentTokenScreen from './src/screens/token/studentTokenScreen';
+import StudentTokenFormScreen from './src/screens/token/studentTokenFormScreen';
+import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
+import StudentQualificationFormScreen from './src/screens/qualification/studentQualificationFormScreen';
+import AddressScreen from './src/screens/address/studentAddressScreen';
+import StudentAddressFormScreen from './src/screens/address/studentAddressFormScreen';
+import StudentBatchScreen from './src/screens/studentBatch/studentBatchScreen';
 
 
 let isLogedIn = true;
@@ -54,13 +56,57 @@ function MainTabNavigator() {
         },
       }}>
       <Tab.Screen
-        name="Home"
+        name="Welcome!"
         component={HomeScreen}
         options={{
           tabBarLabel: 'Home',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="home" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Tokens"
+        component={StudentTokenScreen}
+        options={{
+          tabBarLabel: 'Token',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="certificate" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Addresses"
+        component={AddressScreen}
+        options={{
+          tabBarLabel: 'Address',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="map-marker" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Qualifications"
+        component={StudentQualificationScreen}
+        options={{
+          tabBarLabel: 'Qualification',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="graduation-cap" color={Colors.primary} size={30} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Batches"
+        component={StudentBatchScreen}
+        options={{
+          tabBarLabel: 'Batch',
+          tabBarLabelStyle: { fontSize: 15 },
+          tabBarIcon: ({ color, size }) => (
+            <Icon name="users" color={Colors.primary} size={30} />
           ),
         }}
       />
@@ -72,50 +118,6 @@ function MainTabNavigator() {
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="user" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Token"
-        component={TokenScreen}
-        options={{
-          tabBarLabel: 'Token',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="certificate" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Address"
-        component={AddressScreen}
-        options={{
-          tabBarLabel: 'Address',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="map-marker" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Qualification"
-        component={QualificationScreen}
-        options={{
-          tabBarLabel: 'Qualification',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="graduation-cap" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Batch"
-        component={BatchScreen}
-        options={{
-          tabBarLabel: 'Batch',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="users" color={Colors.primary} size={30} />
           ),
         }}
       />
@@ -162,8 +164,11 @@ function App() {
               <NavigationContainer>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="Main" component={MainTabNavigator} />
-                  <Stack.Screen name="AddressForm" component={AddressFormScreen} />
-                  <Stack.Screen name="QualificationForm" component={QualificationFormScreen} />
+                  <Stack.Screen name="NewsLikeScreen" options={{title: 'News Like', headerShown: true}} component={NewsLikeScreen} />
+                  <Stack.Screen name="NewsCommentScreen" options={{title: 'News Comment', headerShown: true}} component={NewsCommentScreen} />
+                  <Stack.Screen name="StudentTokenFormScreen" options={{title: 'Token Form', headerShown: true}} component={StudentTokenFormScreen} />
+                  <Stack.Screen name="StudentQualificationFormScreen" options={{title: 'Qualification Form', headerShown: true}} component={StudentQualificationFormScreen} />
+                  <Stack.Screen name="StudentAddressFormScreen" options={{title: 'Address Form', headerShown: true}} component={StudentAddressFormScreen} />
                 </Stack.Navigator>
               </NavigationContainer>
             )
@@ -173,7 +178,7 @@ function App() {
                   <Stack.Screen name="login" component={LogIn} />
                   <Stack.Screen name="VerifyOTP" component={VerifyOTP} />
                   <Stack.Screen name="register" component={Register} />
-                  <Stack.Screen name="setPassword" component={SetPassword} />
+                  <Stack.Screen name="registerVerifyOtp" component={RegisterVerifyOtpScreen} />
                   <Stack.Screen name="forgotPassword" component={ForgotPassword} />
                   <Stack.Screen name="forgotVerifyOtp" component={ForgotVerifyOtp} />
                   <Stack.Screen name="forgotSetPassword" component={ForgotSetPassword} />

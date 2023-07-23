@@ -1,7 +1,10 @@
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, SafeAreaView } from "react-native";
 import { useState } from 'react';
-import Icon from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { sendOTP } from '../constants/smsService';
 import Colors from "../constants/Colors";
+import Toast from 'react-native-toast-message';
+import { Post as httpPost } from '../constants/httpService';
 
 const ForgotPassword = ({ navigation }) => {
     const [phone, setPhone] = useState('');
@@ -10,7 +13,46 @@ const ForgotPassword = ({ navigation }) => {
         navigation.navigate('login')
     };
     const handleSendOtp = () => {
-        navigation.navigate('forgotVerifyOtp')
+        httpPost("User/IsExists", { Mobile: phone }).then((res) => {
+            if (res.data == false) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'User dose not exist',
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
+            }
+            else {
+                let otp = Math.floor(1000 + Math.random() * 9000);
+                console.log(otp, "Otp")
+                sendOTP(otp, phone).then((res) => {
+                    console.log(res.data, "Response otp")
+                    if (res.status == 200) {
+                        navigation.navigate("forgotVerifyOtp", { mobile: phone, verifyOtp: otp })
+                    }
+                }
+                ).catch((err) => {
+                    console.error("Send Otp Error : ", err)
+                    Toast.show({
+                        type: 'error',
+                        text1: `${err}`,
+                        position: 'bottom',
+                        visibilityTime: 2000,
+                        autoHide: true,
+                    });
+                })
+            }
+        }).catch((err) => {
+            console.error("IsExist Error : ", err)
+            Toast.show({
+                type: 'error',
+                text1: `${err}`,
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
+        })
     }
     return (
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -34,7 +76,7 @@ const ForgotPassword = ({ navigation }) => {
                         paddingBottom: 8,
                         marginBottom: 25
                     }}>
-                        <Icon name="phone" style={{ marginRight: 5 }} size={20} color="#666" />
+                        <Icon name="mobile" style={{ marginRight: 8, marginLeft: 8, textAlignVertical: 'center' }} size={20} color="#666" />
                         <TextInput
                             style={{ flex: 1, paddingVertical: 0 }}
                             placeholder="Phone No."
@@ -53,6 +95,7 @@ const ForgotPassword = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                 </View>
+                <Toast ref={(ref) => Toast.setRef(ref)} />
             </SafeAreaView>
         </ScrollView>
     );

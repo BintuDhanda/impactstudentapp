@@ -1,49 +1,60 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native';
-import axios from 'axios';
 import Colors from '../../constants/Colors';
+import Toast from 'react-native-toast-message';
 import { useFocusEffect } from '@react-navigation/native';
+import { Get as httpGet, GetStudentIdByUserId } from '../../constants/httpService';
 
-const BatchScreen = ({navigation}) => {
-  const studentId = 2;
+const StudentBatchScreen = () => {
   const [batchList, setBatchList] = useState([]);
-  
+
   useFocusEffect(
     React.useCallback(() => {
       GetStudentBatchByStudentId();
     }, [])
   );
 
-  const GetStudentBatchByStudentId = () => {
-    axios.get(`http://192.168.1.7:5291/api/StudentBatch/getStudentBatchByStudentId?Id=${studentId}`, {
-      headers: {
-        'Content-Type': 'application/json', // Example header
-        'User-Agent': 'react-native/0.64.2', // Example User-Agent header
-      },
-    })
+  const GetStudentBatchByStudentId = async () => {
+    const studentId = await GetStudentIdByUserId();
+    httpGet(`StudentBatch/getStudentBatchByStudentId?Id=${studentId.data.studentId}`)
       .then((response) => {
         console.log(response.data);
         setBatchList(response.data);
       })
       .catch((error) => {
         console.error(error, "Get Student Batch By Student Id Error");
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
       });
   }
 
-  const renderTokenCard = ({ item }) => (
+  const getFormattedDate = (datestring) => {
+    const datetimeString = datestring;
+    const date = new Date(datetimeString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+
+  const renderBatchCard = ({ item }) => (
     <View style={{
       justifyContent: 'space-between',
       backgroundColor: Colors.background,
       borderRadius: 10,
       padding: 10,
       marginBottom: 10,
-      marginTop: 10,
       shadowColor: Colors.shadow,
       shadowOffset: { width: 10, height: 2 },
       shadowOpacity: 4,
       shadowRadius: 10,
       elevation: 10,
-      borderWidth: 0.5,
+      borderWidth: 1.5,
       borderColor: Colors.primary,
     }}>
       <View style={{ flexDirection: 'row' }}>
@@ -52,7 +63,15 @@ const BatchScreen = ({navigation}) => {
       </View>
       <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 16 }}>Date Of Join : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.dateOfJoin}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{getFormattedDate(item.dateOfJoin)}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Registration Number : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.registrationNumber}</Text>
+      </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Text style={{ fontSize: 16 }}>Token Number : </Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.tokenNumber}</Text>
       </View>
     </View>
   );
@@ -63,17 +82,19 @@ const BatchScreen = ({navigation}) => {
         padding: 16,
         justifyContent: 'center'
       }}>
+
         <FlatList
           data={batchList}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderTokenCard}
+          keyExtractor={(item) => item.studentBatchId.toString()}
+          renderItem={renderBatchCard}
         />
+        <Toast ref={(ref) => Toast.setRef(ref)} />
       </View>
     </ScrollView>
   );
 };
 
-export default BatchScreen;
+export default StudentBatchScreen;
 
 // const styles = StyleSheet.create({
 //   container: {

@@ -1,117 +1,161 @@
 import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native'
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Post as httpPost } from '../constants/httpService';
+import Toast from 'react-native-toast-message';
+import { sendOTP } from '../constants/smsService';
+import Colors from "../constants/Colors";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { UserContext } from '../../App';
+import { useContext } from 'react';
 
 const VerifyOTP = ({ navigation }) => {
+    const { verifyOtp, mobile, password } = route.params;
+    const [otp, setOtp] = useState('');
+    const [count, setCount] = useState(1)
+    const [timer, setTimer] = useState(60);
+    const [showResend, setShowResend] = useState(false);
+    const { user, setUser } = useContext(UserContext);
 
-  const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(60);
-  const [showResend, setShowResend] = useState(false);
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prevTimer) => prevTimer - 1);
+            }, 1000);
+        } else {
+            setShowResend(true);
+        }
 
-  useEffect(() => {
-    let interval;
-    if (timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prevTimer) => prevTimer - 1);
-      }, 1000);
-    } else {
-      setShowResend(true);
-    }
+        return () => clearInterval(interval);
+    }, [timer]);
 
-    return () => clearInterval(interval);
-  }, [timer]);
+    const handleOtpChange = (value) => {
+        setOtp(value);
+    };
 
-  const handleOtpChange = (value) => {
-    setOtp(value);
-  };
-
-  const handleConfirmOtp = () => {
-    navigation.navigate('setPassword')
-  };
-
-  const handleResendOtp = () => {
-    setTimer(60);
-    setShowResend(false);
-  };
-    
-    return (
-        <View style={styles.container}>
-            <View>
-                <Image source={require('../assets/impact.png')} />
-            </View>
-            <View style={styles.inputContainer}>
-                <Text style={styles.title}>Welcome Back!</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChangeText={(text) => setOtp(text)}
-                />
-                {
-                    showResend? 
-                    (<TouchableOpacity style={styles.button} onPress={handleResendOtp}>
-                        <Text style={styles.buttonText}>Resend OTP</Text>
-                    </TouchableOpacity>) : (
-                        <TouchableOpacity style={styles.button} onPress={handleConfirmOtp}>
-                        <Text style={styles.buttonText}>Confirm OTP</Text>
-                    </TouchableOpacity>
-                    )
+    const handleConfirmOtp = () => {
+        console.log(otp, verifyOtp)
+        if (otp == verifyOtp) {
+            // get user token api call
+            httpPost("User/IsMobileConfirmed", { userMobile: mobile }).then((response) => {
+                if (response.data == true) {
+                    httpPost("User/login", { userMobile: mobile, userPassword: password }).then((response) => {
+                        console.log(response.data, "Response")
+                        if (response.status === 200) {
+                            AsyncStorage.setItem('user', JSON.stringify(response.data));
+                            setUser(response.data);
+                        }
+                    }).catch((err) => {
+                        console.error("Login error :", err)
+                        Toast.show({
+                            type: 'error',
+                            text1: `${err}`,
+                            position: 'bottom',
+                            visibilityTime: 2000,
+                            autoHide: true,
+                        });
+                    })
                 }
-                <Text>or resend in {timer} Seconds.</Text>
-            </View>
-            <TouchableOpacity style={styles.forgotPassword}>
-                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
-        </View>
+            }).catch((err) => {
+                console.error("IsMobileConfirmed Error:", err)
+                Toast.show({
+                    type: 'error',
+                    text1: `${err}`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
+            })
+        }
+    };
+
+    const handleResendOtp = () => {
+        setCount(count + 1)
+        console.log(count, "Count")
+        if (count >= 3) {
+            Toast.show({
+                type: 'error',
+                text1: 'No Send More Otp You Reached Limit already',
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
+        }
+        else {
+            sendOTP(verifyOtp, mobile).then((res) => {
+                console.log(res.data, "Response otp")
+                if (res.status == 200) {
+                    setTimer(60);
+                    setShowResend(false);
+                }
+            }
+            ).catch((err) => {
+                console.error("Send Otp Error : ", err)
+                Toast.show({
+                    type: 'error',
+                    text1: `${err}`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
+            })
+        }
+    };
+    const handleLogin = () => {
+        navigation.navigate('login');
+    };
+
+    return (
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+            <SafeAreaView style={{ flex: 1, justifyContent: 'center', backgroundColor: Colors.background }}>
+                <View style={{ paddingHorizontal: 25 }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <Image source={require('../assets/impact.png')} />
+                    </View>
+                    <View style={{ alignItems: 'center' }}>
+                        <Text style={{
+                            fontSize: 24,
+                            fontWeight: 'bold',
+                            marginBottom: 30,
+                            alignItems: 'center'
+                        }}>Welcome Back!</Text>
+                    </View>
+                    <View style={{
+                        flexDirection: 'row',
+                        borderBottomColor: Colors.primary,
+                        borderBottomWidth: 1,
+                        paddingBottom: 8,
+                        marginBottom: 25
+                    }}>
+                        <Icon name="key" style={{ marginRight: 8, marginLeft: 8, textAlignVertical: 'center' }} size={20} color="#666" />
+                        <TextInput
+                            style={{ flex: 1, paddingVertical: 0 }}
+                            placeholder="Enter OTP"
+                            value={otp}
+                            keyboardType='numeric'
+                            onChangeText={(text) => setOtp(text)}
+                        />
+                    </View>
+                    {
+                        showResend ?
+                            (<TouchableOpacity style={{ flex: 1, backgroundColor: Colors.primary, padding: 15, borderRadius: 10, marginBottom: 20, }} onPress={handleResendOtp}>
+                                <Text style={{ textAlign: 'center', fontSize: 16, color: '#fff', }}>Resend OTP</Text>
+                            </TouchableOpacity>) : (
+                                <TouchableOpacity style={{ flex: 1, backgroundColor: Colors.primary, padding: 15, borderRadius: 10, marginBottom: 20, }} onPress={handleConfirmOtp}>
+                                    <Text style={{ textAlign: 'center', fontSize: 16, color: '#fff', }}>Confirm OTP</Text>
+                                </TouchableOpacity>
+                            )
+                    }
+                    <Text style={{ alignSelf: 'center' }}>or resend in {timer} Seconds.</Text>
+                    <TouchableOpacity style={{ alignItems: 'center', marginBottom: 20 }} onPress={handleLogin}>
+                        <Text style={{ marginTop: 5, color: '#1c8adb', fontSize: 16 }}>Log In</Text>
+                    </TouchableOpacity>
+                </View>
+                <Toast ref={(ref) => Toast.setRef(ref)} />
+            </SafeAreaView>
+        </ScrollView>
     );
 }
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 30,
-    },
-    inputContainer: {
-        width: '80%',
-        marginBottom: 20,
-        alignItems: 'center',
-        padding: 10,
-    },
-    input: {
-        width: '100%',
-        height: 40,
-        fontSize: 16,
-        borderWidth: 1,
-        borderRadius: 5,
-        color: 'black'
-    },
-    button: {
-        backgroundColor: '#e60000',
-        borderRadius: 5,
-        marginTop: 20,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems:'center',
-        width: '100%',
-    },
-    buttonText: {
-        color: 'white',
-        fontSize: 16,
-    },
-    forgotPassword: {
-        marginTop: 20,
-    },
-    forgotPasswordText: {
-        color: '#1c8adb',
-        fontSize: 16,
-    }
-});
-
 
 export default VerifyOTP;

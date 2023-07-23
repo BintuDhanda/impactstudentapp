@@ -1,66 +1,92 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
-import axios from 'axios';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import Colors from '../../constants/Colors';
 import { useFocusEffect } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { Get as httpGet, GetStudentIdByUserId } from '../../constants/httpService';
 
-const QualificationScreen = ({navigation}) => {
-  const studentId = 2;
+const StudentQualificationScreen = ({ navigation }) => {
   const [qualificationList, setQualificationList] = useState([]);
-  
+  const [studentQualificationDeleteId, setStudentQualificationDeleteId] = useState(0);
+  const [showDelete, setShowDelete] = useState(false);
+
   useFocusEffect(
     React.useCallback(() => {
       GetStudentQualificationByStudentId();
     }, [])
   );
 
-  const GetStudentQualificationByStudentId = () => {
-    axios.get(`http://192.168.1.7:5291/api/StudentQualification/getStudentQualificationByStudentId?Id=${studentId}`, {
-      headers: {
-        'Content-Type': 'application/json', // Example header
-        'User-Agent': 'react-native/0.64.2', // Example User-Agent header
-      },
-    })
+  const GetStudentQualificationByStudentId = async () => {
+    const studentId = await GetStudentIdByUserId();
+    httpGet(`StudentQualification/getStudentQualificationByStudentId?Id=${studentId.data.studentId}`)
       .then((response) => {
-        console.log(response.data);
         setQualificationList(response.data);
       })
       .catch((error) => {
         console.error(error, "Get Student Qualification By Student Id Error");
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
       });
   }
 
-  const handleDeleteStudentQualification= (id) => {
-    axios.delete(`http://192.168.1.7:5291/api/StudentQualification/delete?Id=${id}`)
+  const DeleteStudentQualificationIdConfirm = (studentQualificationid) => {
+    setStudentQualificationDeleteId(studentQualificationid);
+  }
+
+  const DeleteStudentQualificationIdConfirmYes = () => {
+    httpGet(`StudentQualification/delete?Id=${studentQualificationDeleteId}`)
       .then((result) => {
         console.log(result);
         GetStudentQualificationByStudentId();
+        setStudentQualificationDeleteId(0);
+        setShowDelete(false);
       })
-      .catch(err => console.error("Delete Error", err));
+      .catch((error) => {
+        console.error('Delete Student Qualification error', error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      })
   }
 
-  const handleAddQualificationNavigate = () => {
-    navigation.navigate('QualificationForm', {studentId: studentId})
+  const DeleteStudentQualificationIdConfirmNo = () => {
+    setStudentQualificationDeleteId(0);
+    setShowDelete(false);
   }
 
-  const handleEditQualificationNavigate = (qualificationId) => {
-    navigation.navigate('QualificationForm', {studentId: studentId,qualificationId: qualificationId})
+  const handleAddQualificationNavigate = async () => {
+    const studentId = await GetStudentIdByUserId();
+    navigation.navigate('StudentQualificationFormScreen', { studentId: studentId.data.studentId })
   }
 
-  const renderTokenCard = ({ item }) => (
+  const handleEditQualificationNavigate = async (qualificationId) => {
+    const studentId = await GetStudentIdByUserId();
+    navigation.navigate('StudentQualificationFormScreen', { studentId: studentId.data.studentId, qualificationId: qualificationId })
+  }
+
+  const renderQualificationCard = ({ item }) => (
     <View style={{
       justifyContent: 'space-between',
       backgroundColor: Colors.background,
       borderRadius: 10,
       padding: 10,
       marginBottom: 10,
-      marginTop: 10,
       shadowColor: Colors.shadow,
       shadowOffset: { width: 10, height: 2 },
       shadowOpacity: 4,
       shadowRadius: 10,
       elevation: 10,
-      borderWidth: 0.5,
+      borderWidth: 1.5,
       borderColor: Colors.primary,
     }}>
       <View style={{ flexDirection: 'row' }}>
@@ -88,30 +114,11 @@ const QualificationScreen = ({navigation}) => {
         <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.grade}</Text>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-        <TouchableOpacity style={{
-          backgroundColor: '#5a67f2',
-          borderRadius: 5,
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-          marginRight: 10,
-        }} onPress={() => handleEditQualificationNavigate(item.id)}>
-          <Text style={{
-            color: Colors.background,
-            fontSize: 14,
-            fontWeight: 'bold',
-          }}>Edit</Text>
+        <TouchableOpacity style={{ marginRight: 10, }} onPress={() => handleEditQualificationNavigate(item.studentQualificationId)}>
+          <Icon name="pencil" size={20} color={'#5a67f2'} style={{ marginLeft: 8, textAlignVertical: 'center' }} />
         </TouchableOpacity>
-        <TouchableOpacity style={{
-          backgroundColor: '#f25252',
-          borderRadius: 5,
-          paddingVertical: 8,
-          paddingHorizontal: 12,
-        }} onPress={() => handleDeleteStudentQualification(item.id)}>
-          <Text style={{
-            color: Colors.background,
-            fontSize: 14,
-            fontWeight: 'bold',
-          }}>Delete</Text>
+        <TouchableOpacity onPress={() => { DeleteStudentQualificationIdConfirm(item.studentQualificationId); setShowDelete(true); }}>
+          <Icon name="trash" size={20} color={'#f25252'} style={{ marginRight: 8, textAlignVertical: 'center' }} />
         </TouchableOpacity>
       </View>
     </View>
@@ -137,17 +144,67 @@ const QualificationScreen = ({navigation}) => {
             textAlign: 'center'
           }}>Add Qualification</Text>
         </TouchableOpacity>
+
+        {showDelete && (
+          <Modal transparent visible={showDelete}>
+            <View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <View style={{
+                backgroundColor: Colors.background,
+                borderRadius: 10,
+                padding: 28,
+                shadowColor: Colors.shadow,
+                width: '80%',
+              }}>
+                <Text style={{ fontSize: 18, marginBottom: 5, alignSelf: 'center', fontWeight: 'bold' }}>Are You Sure You Want To Delete</Text>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+
+                  <TouchableOpacity style={{
+                    backgroundColor: Colors.primary,
+                    borderRadius: 5,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    marginTop: 10,
+                    marginRight: 3,
+                  }} onPress={() => {
+                    DeleteStudentQualificationIdConfirmYes();
+                  }}>
+                    <Text style={{ fontSize: 16, color: Colors.background }}>Yes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={{
+                    backgroundColor: '#f25252',
+                    borderRadius: 5,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    marginTop: 10,
+                  }} onPress={() => {
+                    DeleteStudentQualificationIdConfirmNo();
+                  }}>
+                    <Text style={{ fontSize: 16, color: Colors.background }}>No</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+        )}
+
         <FlatList
           data={qualificationList}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderTokenCard}
+          keyExtractor={(item) => item.studentQualificationId.toString()}
+          renderItem={renderQualificationCard}
         />
+        <Toast ref={(ref) => Toast.setRef(ref)} />
       </View>
     </ScrollView>
   );
 };
 
-export default QualificationScreen;
+export default StudentQualificationScreen;
 
 // const styles = StyleSheet.create({
 //   container: {

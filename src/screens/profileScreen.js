@@ -1,16 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import React, { useEffect, useContext, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Image } from 'react-native';
+import { UserContext } from '../../App';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../constants/Colors';
-import axios from 'axios';
+import { Post as httpPost, Get as httpGet } from '../constants/httpService';
+import { News_URL } from '../constants/constant';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ProfileScreen = ({ route, navigation }) => {
 
+    const { user, setUser } = useContext(UserContext);
     // const { userId, studentId } = route.params;
-    const studentId = 2;
-    const userId = 1;
-    console.log(studentId == undefined ? 0 : studentId, "studentId")
+
+    const userId = user == null ? 0 : user.userId;
     const [studentDetails, setStudentDetails] = useState({
-        "Id": studentId == undefined ? 0 : studentId,
+        "StudentId": 0,
+        "StudentImage": null,
         "FirstName": "",
         "LastName": "",
         "FatherName": "",
@@ -21,14 +26,20 @@ const ProfileScreen = ({ route, navigation }) => {
         "BodyRemark": "",
         "UserId": userId,
         "IsActive": true,
+        "CreatedAt": null,
+        "CreatedBy": user == null ? 0 : user.userId,
+        "LastUpdatedBy": null,
     });
 
     console.log(studentDetails, "StudentDetails")
-    useEffect(() => {
-        if (studentDetails.Id !== 0) {
-            GetStudentDetailsByUserId();
-        }
-    }, [])
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (studentDetails.Id !== 0) {
+                GetStudentDetailsByUserId();
+            }
+        }, [])
+    );
 
     const handleInputChange = (name, value) => {
         setStudentDetails((prevStudentDetails) => ({
@@ -50,22 +61,26 @@ const ProfileScreen = ({ route, navigation }) => {
     };
 
     const GetStudentDetailsByUserId = () => {
-        axios.get(`http://192.168.1.7:5291/api/StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
+        httpGet(`StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
             .then((result) => {
                 console.log(result.data, "studentDetailsByUserId");
                 setStudentDetails(
                     {
-                        Id: result.data.id,
-                        FirstName: result.data.firstName,
-                        LastName: result.data.lastName,
-                        FatherName: result.data.fatherName,
-                        MotherName: result.data.motherName,
-                        Gender: result.data.gender,
-                        StudentHeight: result.data.studentHeight,
-                        StudentWeight: result.data.studentWeight,
-                        BodyRemark: result.data.bodyRemark,
-                        UserId: result.data.userId,
-                        IsActive: result.data.isActive
+                        StudentId: result.data.studentId?result.data.studentId:0,
+                        StudentImage: result.data.studentImage?result.data.studentImage:null,
+                        FirstName: result.data.firstName?result.data.firstName:"",
+                        LastName: result.data.lastName?result.data.lastName:"",
+                        FatherName: result.data.fatherName?result.data.fatherName:"",
+                        MotherName: result.data.motherName?result.data.motherName:"",
+                        Gender: result.data.gender?result.data.gender:"",
+                        StudentHeight: result.data.studentHeight? result.data.studentHeight.toString():"",
+                        StudentWeight: result.data.studentWeight?result.data.studentWeight.toString():"",
+                        BodyRemark: result.data.bodyRemark?result.data.bodyRemark:"",
+                        UserId: result.data.userId?result.data.userId:userId,
+                        IsActive: result.data.isActive?result.data.isActive:true,
+                        CreatedAt: result.data.createdAt?result.data.createdAt:null,
+                        CreatedBy: result.data.createdBy?result.data.createdBy:user == null ? 0 : user.userId,
+                        LastUpdatedBy: user == null ? 0 : user.userId,
                     }
                 );
             })
@@ -73,40 +88,27 @@ const ProfileScreen = ({ route, navigation }) => {
     };
 
     const handleSaveStudentDetails = async () => {
-        try {
-            if (studentDetails.Id !== 0) {
-                await axios.put(`http://192.168.1.7:5291/api/StudentDetails/put`, JSON.stringify(studentDetails), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then((response) => {
-                        if (response.status === 200) {
-                            Alert.alert('Success', 'Update Student Successfully')
-                            navigation.goBack();
-                        }
-                    })
-                    .catch(err => console.error("Student Details update error : ", err));
-            }
-            else {
-                await axios.post(`http://192.168.1.7:5291/api/StudentDetails/post`, JSON.stringify(studentDetails), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                    .then((response) => {
-                        if (response.status === 200) {
-                            Alert.alert('Success', 'Add Student Details Successfully')
-                            navigation.navigate('Home')
-                        }
-                    })
-                    .catch(err => console.error('Student Details Add error :', err));
-            }
-        }
-        catch (error) {
-            console.error('Error saving Student Detail:', error);
-        }
+        await httpPost('StudentDetails/post', studentDetails)
+            .then((response) => {
+                if (response.status === 200) {
+                    response.data.message == null || response.data.message == "" ?
+                        Alert.alert('Success', response.data.message) :
+                        Alert.alert('Exists', response.data.message);
+                    navigation.goBack();
+                }
+            })
+            .catch(err => console.error('Student Details Add error :', err));
     }
+
+    const handleLogOut = async () => {
+
+        try {
+            const savedUser = await AsyncStorage.clear();
+        } catch (error) {
+            console.log(error);
+        }
+        setUser(null);
+    };
 
     const handleCancel = () => {
         navigation.goBack();
@@ -124,7 +126,10 @@ const ProfileScreen = ({ route, navigation }) => {
                 elevation: 2,
             }}>
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, }}>Student Form</Text>
+                    <Image
+                        source={studentDetails.StudentImage == null ? require('../icons/user.png') : { uri: News_URL + studentDetails.StudentImage }}
+                        style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 10 }}
+                    />
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>First Name:</Text>
                     <TextInput
                         style={{
@@ -139,6 +144,7 @@ const ProfileScreen = ({ route, navigation }) => {
                         value={studentDetails.FirstName}
                         onChangeText={(value) => handleInputChange('FirstName', value)}
                         placeholder="Enter first name"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Last Name:</Text>
@@ -155,6 +161,7 @@ const ProfileScreen = ({ route, navigation }) => {
                         value={studentDetails.LastName}
                         onChangeText={(value) => handleInputChange('LastName', value)}
                         placeholder="Enter last name"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Father Name:</Text>
@@ -171,6 +178,7 @@ const ProfileScreen = ({ route, navigation }) => {
                         value={studentDetails.FatherName}
                         onChangeText={(value) => handleInputChange('FatherName', value)}
                         placeholder="Enter father name"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Mother Name:</Text>
@@ -187,51 +195,74 @@ const ProfileScreen = ({ route, navigation }) => {
                         value={studentDetails.MotherName}
                         onChangeText={(value) => handleInputChange('MotherName', value)}
                         placeholder="Enter mother name"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Gender:</Text>
-                    <TouchableOpacity
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            position: 'relative',
-                            zIndex: 1,
-                        }}
-                        onPress={toggleGenderDropdown}
-                    >
-                        <Text style={{ fontSize: 16, }}>{studentDetails.Gender || 'Select gender'}</Text>
-                        {showGenderDropdown && (
-                            <View style={{
-                                position: 'absolute',
-                                top: 40,
-                                left: 0,
-                                right: 0,
+                    {studentDetails.StudentId == 0 ?
+                        (<TouchableOpacity
+                            style={{
                                 borderWidth: 1,
                                 borderColor: Colors.primary,
-                                backgroundColor: Colors.background,
                                 borderRadius: 5,
-                                padding: 10,
-                                marginTop: 5,
-                            }}>
-                                <TouchableOpacity
-                                    style={{ paddingVertical: 8, }}
-                                    onPress={() => selectGender('Male')}
-                                >
-                                    <Text style={{ fontSize: 16, }}>Male</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={{ paddingVertical: 8, }}
-                                    onPress={() => selectGender('Female')}
-                                >
-                                    <Text style={{ fontSize: 16, }}>Female</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </TouchableOpacity>
+                                paddingHorizontal: 10,
+                                paddingVertical: 8,
+                                marginBottom: 10,
+                                position: 'relative',
+                                zIndex: 1,
+                            }}
+                            onPress={toggleGenderDropdown}
+                        >
+                            <Text style={{ fontSize: 16, }}>{studentDetails.Gender || 'Select gender'}</Text>
+                            {showGenderDropdown && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: 40,
+                                    left: 0,
+                                    right: 0,
+                                    borderWidth: 1,
+                                    borderColor: Colors.primary,
+                                    backgroundColor: Colors.background,
+                                    borderRadius: 5,
+                                    padding: 10,
+                                    marginTop: 5,
+                                }}>
+                                    <TouchableOpacity
+                                        style={{ paddingVertical: 8, }}
+                                        onPress={() => selectGender('Male')}
+                                    >
+                                        <Text style={{ fontSize: 16, }}>Male</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ paddingVertical: 8, }}
+                                        onPress={() => selectGender('Female')}
+                                    >
+                                        <Text style={{ fontSize: 16, }}>Female</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ paddingVertical: 8, }}
+                                        onPress={() => selectGender('Other')}
+                                    >
+                                        <Text style={{ fontSize: 16, }}>Other</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </TouchableOpacity>)
+                        : (<TextInput
+                            style={{
+                                borderWidth: 1,
+                                borderColor: Colors.primary,
+                                borderRadius: 5,
+                                paddingHorizontal: 10,
+                                paddingVertical: 8,
+                                marginBottom: 10,
+                                fontSize: 16,
+                            }}
+                            value={studentDetails.Gender}
+                            onChangeText={(value) => handleInputChange('MotherName', value)}
+                            placeholder="Enter mother name"
+                            editable={studentDetails.StudentId == 0 ? true : false}
+                        />)}
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Height:</Text>
                     <TextInput
@@ -244,10 +275,11 @@ const ProfileScreen = ({ route, navigation }) => {
                             marginBottom: 10,
                             fontSize: 16,
                         }}
-                        value={studentDetails.StudentHeight.toString()}
+                        value={studentDetails.StudentHeight}
                         onChangeText={(value) => setStudentDetails({ ...studentDetails, StudentHeight: isNaN(parseInt(value)) ? "" : parseInt(value) })}
                         placeholder="Enter height"
                         keyboardType="numeric"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Weight:</Text>
@@ -261,10 +293,11 @@ const ProfileScreen = ({ route, navigation }) => {
                             marginBottom: 10,
                             fontSize: 16,
                         }}
-                        value={studentDetails.StudentWeight.toString()}
+                        value={studentDetails.StudentWeight}
                         onChangeText={(value) => setStudentDetails({ ...studentDetails, StudentWeight: isNaN(parseInt(value)) ? "" : parseInt(value) })}
                         placeholder="Enter weight"
                         keyboardType="numeric"
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Body Remarks:</Text>
@@ -277,30 +310,40 @@ const ProfileScreen = ({ route, navigation }) => {
                             paddingVertical: 8,
                             marginBottom: 10,
                             fontSize: 16,
-                        }, {height: 80, textAlignVertical: 'top',}]}
+                        }, { height: 80, textAlignVertical: 'top', }]}
                         value={studentDetails.BodyRemark}
                         onChangeText={(value) => handleInputChange('BodyRemark', value)}
                         placeholder="Enter body remarks"
                         multiline
+                        editable={studentDetails.StudentId == 0 ? true : false}
                     />
-                    <TouchableOpacity style={{
-                        backgroundColor: Colors.primary,
-                        padding: 10,
-                        borderRadius: 5,
-                        marginTop: 10,
-                        alignItems: 'center',
-                    }} onPress={handleSaveStudentDetails}>
-                        <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentDetails.Id !== 0 ? "Save" : "Add"}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        backgroundColor: '#f25252',
-                        padding: 10,
-                        borderRadius: 5,
-                        marginTop: 10,
-                        alignItems: 'center',
-                    }} onPress={handleCancel}>
-                        <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>Cancel</Text>
-                    </TouchableOpacity>
+                    {studentDetails.StudentId === 0 ?
+                        <>
+                            <TouchableOpacity style={{
+                                backgroundColor: Colors.primary,
+                                padding: 10,
+                                borderRadius: 5,
+                                marginTop: 10,
+                                alignItems: 'center',
+                            }} onPress={handleSaveStudentDetails}>
+                                <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentDetails.StudentId !== 0 ? "Save" : "Add"}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={{
+                                backgroundColor: '#f25252',
+                                padding: 10,
+                                borderRadius: 5,
+                                marginTop: 10,
+                                alignItems: 'center',
+                            }} onPress={handleCancel}>
+                                <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>Cancel</Text>
+                            </TouchableOpacity>
+                        </>
+                        : null}
+                    <View style={{ justifyContent: "center", marginTop: 30, marginBottom: 20 }}>
+                        <TouchableOpacity onPress={handleLogOut}>
+                            <Text style={{ color: '#1c8adb', fontSize: 16, alignSelf: 'center' }}>LogOut</Text>
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
             </View>
         </View>

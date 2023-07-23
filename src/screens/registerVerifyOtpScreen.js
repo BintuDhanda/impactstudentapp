@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { Post as httpPost } from '../constants/httpService';
 import Toast from 'react-native-toast-message';
 import { sendOTP } from '../constants/smsService';
 import Colors from "../constants/Colors";
+import { UserContext } from '../../App';
+import { useContext } from 'react';
 
-const ForgotVerifyOtp = ({ route, navigation }) => {
-    const { verifyOtp, mobile } = route.params;
+const RegisterVerifyOtpScreen = ({route, navigation }) => {
+    const { verifyOtp, password, mobile } = route.params;
     const [otp, setOtp] = useState('');
     const [count, setCount] = useState(1)
     const [timer, setTimer] = useState(60);
@@ -25,13 +28,29 @@ const ForgotVerifyOtp = ({ route, navigation }) => {
         return () => clearInterval(interval);
     }, [timer]);
 
-    const handleLogin = () => {
-        navigation.navigate('login');
+    const handleOtpChange = (value) => {
+        setOtp(value);
     };
 
     const handleConfirmOtp = () => {
+        console.log(otp, verifyOtp)
         if (otp == verifyOtp) {
-            navigation.navigate('login')
+            // get user token api call
+            httpPost("User/signUp", { UserMobile: mobile, UserPassword: password, IsMobileConfirmed: true, IsActive: true }).then((response) => {
+                console.log(response.data, "Response")
+                if (response.status === 200) {
+                    handleLogin();
+                }
+            }).catch((err) => {
+                console.error("SignUp error :", err)
+                Toast.show({
+                    type: 'error',
+                    text1: `${err}`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
+            })
         }
     };
 
@@ -66,6 +85,9 @@ const ForgotVerifyOtp = ({ route, navigation }) => {
                 });
             })
         }
+    };
+    const handleLogin = () => {
+        navigation.navigate('login');
     };
 
     return (
@@ -120,4 +142,4 @@ const ForgotVerifyOtp = ({ route, navigation }) => {
     );
 }
 
-export default ForgotVerifyOtp
+export default RegisterVerifyOtpScreen;

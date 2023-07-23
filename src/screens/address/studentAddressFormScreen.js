@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import Colors from '../../constants/Colors';
+import Toast from 'react-native-toast-message';
 import { Dropdown } from 'react-native-element-dropdown';
-import axios from 'axios';
+import { UserContext } from '../../../App';
+import { useContext } from 'react';
+import { Get as httpGet, Post as httpPost } from '../../constants/httpService';
 
-const AddressFormScreen = ({ route, navigation }) => {
-
+const StudentAddressFormScreen = ({ route, navigation }) => {
+  const { user, setUser } = useContext(UserContext);
   const { addressId, studentId } = route.params;
   const [studentAddress, setStudentAddress] = useState({
-    "Id": 0,
+    "StudentAddressId": 0,
     "AddressTypeId": "",
     "Address": "",
     "CountryId": "",
@@ -17,10 +20,12 @@ const AddressFormScreen = ({ route, navigation }) => {
     "Pincode": "",
     "StudentId": studentId,
     "IsActive": true,
-    "CreatedAt": null
+    "CreatedAt": null,
+    "CreatedBy": user.userId,
+    "LastUpdatedBy": null,
   });
   const [addressTypeList, setAddressTypeList] = useState([]);
-  const [countryList,setCountryList] = useState([]);
+  const [countryList, setCountryList] = useState([]);
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
 
@@ -30,22 +35,22 @@ const AddressFormScreen = ({ route, navigation }) => {
   const [isFocus, setIsFocus] = useState(false);
 
   useEffect(() => {
-    if(addressTypeList.length === 0){
+    if (addressTypeList.length === 0) {
       GetAddressTypeList();
     }
   }, [])
 
-  useEffect(()=>{
-    if(countryList.length === 0){
+  useEffect(() => {
+    if (countryList.length === 0) {
       GetCountryList();
     }
-  },[])
+  }, [])
 
-  useEffect(()=>{
-    if(addressId !== undefined){
+  useEffect(() => {
+    if (addressId !== undefined) {
       GetAddressById();
     }
-  },[addressId])
+  }, [addressId])
 
   const handleInputChange = (name, value) => {
     setStudentAddress((prevStudentAddress) => ({
@@ -55,113 +60,127 @@ const AddressFormScreen = ({ route, navigation }) => {
   };
 
   const GetAddressById = () => {
-    axios.get(`http://192.168.1.7:5291/api/StudentAddress/getById?Id=${addressId}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-    .then((response)=>{
-      setStudentAddress({
-        Id: response.data.id,
-        AddressTypeId: response.data.addressTypeId,
-        Address: response.data.address,
-        CountryId: response.data.countryId,
-        StateId: response.data.stateId,
-        CityId: response.data.cityId,
-        Pincode: response.data.pincode,
-        StudentId: response.data.studentId,
-        IsActive: response.data.isActive,
-        CreatedAt: response.data.createdAt
+    httpGet(`StudentAddress/getById?Id=${addressId}`)
+      .then((response) => {
+        setStudentAddress({
+          StudentAddressId: response.data.studentAddressId,
+          AddressTypeId: response.data.addressTypeId,
+          Address: response.data.address,
+          CountryId: response.data.countryId,
+          StateId: response.data.stateId,
+          CityId: response.data.cityId,
+          Pincode: response.data.pincode,
+          StudentId: response.data.studentId,
+          IsActive: response.data.isActive,
+          CreatedAt: response.data.createdAt,
+          CreatedBy: response.data.createdBy,
+          LastUpdatedBy: user.userId,
+        })
       })
-    })
+      .catch((err) => {
+        console.error('Get Student Address Get By Id : ', err);
+        Toast.show({
+          type: 'error',
+          text1: `${err}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      })
   }
 
   const GetAddressTypeList = () => {
-    axios.get('http://192.168.1.7:5291/api/AddressType/get', {
-      headers: {
-        'Content-Type': 'application/json', // Example header
-        'User-Agent': 'react-native/0.64.2', // Example User-Agent header
-      },
-    })
+    httpGet("AddressType/get")
       .then((response) => {
         console.log(response.data);
         setAddressTypeList(response.data);
       })
       .catch((error) => {
         console.error(error, "Get Address Type List Error");
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
       });
   }
 
   const GetCountryList = () => {
-    axios.get('http://192.168.1.7:5291/api/Country/get', {
-      headers: {
-        'Content-Type': 'application/json', // Example header
-        'User-Agent': 'react-native/0.64.2', // Example User-Agent header
-      },
-    })
+    httpGet("Country/get")
       .then((response) => {
         setCountryList(response.data);
       })
       .catch((error) => {
         console.error(error, "Get Country List Error");
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
       });
   }
 
   const fetchStateByCountryId = async (countryId) => {
-    await axios.get(`http://192.168.1.7:5291/api/State/getStateByCountryId?Id=${countryId}`,{
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    })
-    .then((response)=>{
-      setStateList(response.data)
-    })
-    .catch((error)=>{
-      console.error("Error Get State By Country Id", error)
-    })
+    await httpGet(`State/getStateByCountryId?Id=${countryId}`)
+      .then((response) => {
+        setStateList(response.data)
+      })
+      .catch((error) => {
+        console.error("Error Get State By Country Id", error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      })
   }
 
   const fetchCityByStateId = async (stateId) => {
-    await axios.get(`http://192.168.1.7:5291/api/City/getCityByStateId?Id=${stateId}`,{
-      headers:{
-        'Content-Type': 'application/json'
-      }
-    })
-    .then((response)=>{
-      setCityList(response.data)
-    })
-    .catch((error)=>{
-      console.error("Error Get City By State Id", error)
-    })
+    await httpGet(`City/getCityByStateId?Id=${stateId}`)
+      .then((response) => {
+        setCityList(response.data)
+      })
+      .catch((error) => {
+        console.error("Error Get City By State Id", error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      })
   }
   const handleCountrySelect = (country) => {
-    setCountryValue(country.id);
-    setStudentAddress({...studentAddress, CountryId: country.id})
-    fetchStateByCountryId(country.id);
+    setCountryValue(country.countryId);
+    setStudentAddress({ ...studentAddress, CountryId: country.countryId })
+    fetchStateByCountryId(country.countryId);
   };
   const handleStateSelect = (state) => {
-    setStateValue(state.id);
-    setStudentAddress({...studentAddress, StateId: state.id})
-    fetchCityByStateId(state.id);
+    setStateValue(state.stateId);
+    setStudentAddress({ ...studentAddress, StateId: state.stateId })
+    fetchCityByStateId(state.stateId);
   };
   const handleCitySelect = (city) => {
-    setCityValue(city.id);
-    setStudentAddress({...studentAddress, CityId: city.id})
+    setCityValue(city.cityId);
+    setStudentAddress({ ...studentAddress, CityId: city.cityId })
   };
 
   const handleSaveStudentAddress = async () => {
     try {
-      if (studentAddress.Id !== 0) {
-        await axios.put(`http://192.168.1.7:5291/api/StudentAddress/put`, JSON.stringify(studentAddress), {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
+      if (studentAddress.StudentAddressId !== 0) {
+        await httpPost('StudentAddress/put', studentAddress)
           .then((response) => {
             if (response.status === 200) {
               Alert.alert('Success', 'Update Address Successfully')
               setStudentAddress({
-                "Id": 0,
+                "StudentAddressId": 0,
                 "AddressTypeId": "",
                 "Address": "",
                 "CountryId": "",
@@ -170,24 +189,31 @@ const AddressFormScreen = ({ route, navigation }) => {
                 "Pincode": "",
                 "StudentId": studentId,
                 "IsActive": true,
-                "CreatedAt": null
+                "CreatedAt": null,
+                "CreatedBy": user.userId,
+                "LastUpdatedBy": null,
               })
               navigation.goBack();
             }
           })
-          .catch(err => console.error("Address update error : ", err));
+          .catch((err) => {
+            console.error("Address update error : ", err);
+            Toast.show({
+              type: 'error',
+              text1: `${err}`,
+              position: 'bottom',
+              visibilityTime: 2000,
+              autoHide: true,
+            });
+          });
       }
       else {
-        await axios.post(`http://192.168.1.7:5291/api/StudentAddress/post`, JSON.stringify(studentAddress), {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
+        await httpPost("StudentAddress/post", studentAddress)
           .then((response) => {
             if (response.status === 200) {
               Alert.alert('Success', 'Add Address Successfully')
               setStudentAddress({
-                "Id": 0,
+                "StudentAddressId": 0,
                 "AddressTypeId": "",
                 "Address": "",
                 "CountryId": "",
@@ -196,22 +222,40 @@ const AddressFormScreen = ({ route, navigation }) => {
                 "Pincode": "",
                 "StudentId": studentId,
                 "IsActive": true,
-                "CreatedAt": null
+                "CreatedAt": null,
+                "CreatedBy": user.userId,
+                "LastUpdatedBy": null,
               })
-              navigation.navigate('Home')
+              navigation.goBack();
             }
           })
-          .catch(err => console.error('Address Add error :', err));
+          .catch((err) => {
+            console.error('Address Add error :', err);
+            Toast.show({
+              type: 'error',
+              text1: `${err}`,
+              position: 'bottom',
+              visibilityTime: 2000,
+              autoHide: true,
+            });
+          });
       }
     }
     catch (error) {
       console.error('Error saving Address:', error);
+      Toast.show({
+        type: 'error',
+        text1: `${error}`,
+        position: 'bottom',
+        visibilityTime: 2000,
+        autoHide: true,
+      });
     }
   }
 
   const handleCancel = () => {
     setStudentAddress({
-      "Id": 0,
+      "StudentAddressId": 0,
       "AddressTypeId": "",
       "Address": "",
       "CountryId": "",
@@ -220,7 +264,9 @@ const AddressFormScreen = ({ route, navigation }) => {
       "Pincode": "",
       "StudentId": studentId,
       "IsActive": true,
-      "CreatedAt": null
+      "CreatedAt": null,
+      "CreatedBy": user.userId,
+      "LastUpdatedBy": null,
     })
     navigation.goBack();
   }
@@ -237,7 +283,7 @@ const AddressFormScreen = ({ route, navigation }) => {
         elevation: 2,
       }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, }}>Address Form</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 16, }}>Student Address Form</Text>
           <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Address Type:</Text>
           <Dropdown
             style={[{
@@ -262,13 +308,13 @@ const AddressFormScreen = ({ route, navigation }) => {
             search
             maxHeight={300}
             labelField="addressTypeName"
-            valueField="id"
+            valueField="addressTypeId"
             placeholder={!isFocus ? 'Select Address Type' : '...'}
             searchPlaceholder="Search..."
             value={studentAddress.AddressTypeId}
             onFocus={() => setIsFocus(true)}
             onBlur={() => setIsFocus(false)}
-            onChange={(value) => setStudentAddress({ ...studentAddress, AddressTypeId: value.id}) }
+            onChange={(value) => setStudentAddress({ ...studentAddress, AddressTypeId: value.addressTypeId })}
           />
           <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Address :</Text>
           <TextInput
@@ -310,7 +356,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             search
             maxHeight={300}
             labelField="countryName"
-            valueField="id"
+            valueField="countryId"
             placeholder={!isFocus ? 'Select Country' : '...'}
             searchPlaceholder="Search..."
             value={countryValue}
@@ -342,7 +388,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             search
             maxHeight={300}
             labelField="stateName"
-            valueField="id"
+            valueField="stateId"
             placeholder={!isFocus ? 'Select State' : '...'}
             searchPlaceholder="Search..."
             value={stateValue}
@@ -374,7 +420,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             search
             maxHeight={300}
             labelField="cityName"
-            valueField="id"
+            valueField="cityId"
             placeholder={!isFocus ? 'Select City' : '...'}
             searchPlaceholder="Search..."
             value={cityValue}
@@ -399,7 +445,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             placeholder="Enter Pincode"
             keyboardType="numeric"
           />
-          
+
           <TouchableOpacity style={{
             backgroundColor: Colors.primary,
             padding: 10,
@@ -407,7 +453,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             marginTop: 10,
             alignItems: 'center',
           }} onPress={handleSaveStudentAddress}>
-            <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentAddress.Id !== 0 ? "Save" : "Add"}</Text>
+            <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentAddress.StudentAddressId !== 0 ? "Save" : "Add"}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={{
             backgroundColor: '#f25252',
@@ -419,6 +465,7 @@ const AddressFormScreen = ({ route, navigation }) => {
             <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>Cancel</Text>
           </TouchableOpacity>
         </ScrollView>
+        <Toast ref={(ref) => Toast.setRef(ref)} />
       </View>
     </View>
   );
@@ -514,4 +561,4 @@ const AddressFormScreen = ({ route, navigation }) => {
 //     }
 // });
 
-export default AddressFormScreen;
+export default StudentAddressFormScreen;

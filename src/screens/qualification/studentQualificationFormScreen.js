@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import Colors from '../../constants/Colors';
+import Toast from 'react-native-toast-message';
 import { Dropdown } from 'react-native-element-dropdown';
-import axios from 'axios';
+import { UserContext } from '../../../App';
+import { useContext } from 'react';
+import { Get as httpGet, Post as httpPost } from '../../constants/httpService';
 
-const QualificationFormScreen = ({ route, navigation }) => {
-
+const StudentQualificationFormScreen = ({ route, navigation }) => {
+    const { user, setUser } = useContext(UserContext);
     const { qualificationId, studentId } = route.params;
     const [studentQualification, setStudentQualification] = useState({
-        "Id": 0,
+        "StudentQualificationId": 0,
         "QualificationId": "",
         "Subject": "",
         "MaximumMark": "",
@@ -18,6 +21,8 @@ const QualificationFormScreen = ({ route, navigation }) => {
         "StudentId": studentId,
         "IsActive": true,
         "CreatedAt": null,
+        "CreatedBy": user.userId,
+        "LastUpdatedBy": null,
     });
     const [qualificationList, setQualificationList] = useState([]);
 
@@ -43,14 +48,10 @@ const QualificationFormScreen = ({ route, navigation }) => {
     };
 
     const GetQualificationById = () => {
-        axios.get(`http://192.168.1.7:5291/api/StudentQualification/getById?Id=${qualificationId}`, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
+        httpGet(`StudentQualification/getById?Id=${qualificationId}`)
             .then((response) => {
                 setStudentQualification({
-                    Id: response.data.id,
+                    StudentQualificationId: response.data.studentQualificationId,
                     QualificationId: response.data.qualificationId,
                     Subject: response.data.subject,
                     MaximumMark: response.data.maximumMark,
@@ -60,39 +61,49 @@ const QualificationFormScreen = ({ route, navigation }) => {
                     StudentId: response.data.studentId,
                     IsActive: response.data.isActive,
                     CreatedAt: response.data.createdAt,
+                    CreatedBy: response.data.createdBy,
+                    LastUpdatedBy: user.userId,
                 })
+            })
+            .catch((err) => {
+                console.error('Get Student Qualification Get By Id : ', err);
+                Toast.show({
+                    type: 'error',
+                    text1: `${err}`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
             })
     }
 
     const GetQualificationList = () => {
-        axios.get('http://192.168.1.7:5291/api/Qualification/get', {
-            headers: {
-                'Content-Type': 'application/json', // Example header
-                'User-Agent': 'react-native/0.64.2', // Example User-Agent header
-            },
-        })
+        httpGet("Qualification/get")
             .then((response) => {
                 console.log(response.data);
                 setQualificationList(response.data);
             })
             .catch((error) => {
                 console.error(error, "Get Qualification List Error");
+                Toast.show({
+                    type: 'error',
+                    text1: `${error}`,
+                    position: 'bottom',
+                    visibilityTime: 2000,
+                    autoHide: true,
+                });
             });
     }
 
     const handleSaveStudentQualification = async () => {
         try {
-            if (studentQualification.Id !== 0) {
-                await axios.put(`http://192.168.1.7:5291/api/StudentQualification/put`, JSON.stringify(studentQualification), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
+            if (studentQualification.StudentQualificationId !== 0) {
+                await httpPost("StudentQualification/put", studentQualification)
                     .then((response) => {
                         if (response.status === 200) {
                             Alert.alert('Success', 'Update Qualification Successfully')
                             setStudentQualification({
-                                "Id": 0,
+                                "StudentQualificationId": 0,
                                 "QualificationId": "",
                                 "Subject": "",
                                 "MaximumMark": "",
@@ -102,24 +113,31 @@ const QualificationFormScreen = ({ route, navigation }) => {
                                 "StudentId": studentId,
                                 "IsActive": true,
                                 "CreatedAt": null,
+                                "CreatedBy": user.userId,
+                                "LastUpdatedBy": null,
                             })
                             navigation.goBack();
                         }
                     })
-                    .catch(err => console.error("Qualification update error : ", err));
+                    .catch((err) => {
+                        console.error("Qualification update error : ", err);
+                        Toast.show({
+                            type: 'error',
+                            text1: `${err}`,
+                            position: 'bottom',
+                            visibilityTime: 2000,
+                            autoHide: true,
+                        });
+                    });
             }
             else {
                 console.log(studentQualification, "studentQualification")
-                await axios.post(`http://192.168.1.7:5291/api/StudentQualification/post`, JSON.stringify(studentQualification), {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
+                await httpPost("StudentQualification/post", studentQualification)
                     .then((response) => {
                         if (response.status === 200) {
                             Alert.alert('Success', 'Add Qualification Successfully')
                             setStudentQualification({
-                                "Id": 0,
+                                "StudentQualificationId": 0,
                                 "QualificationId": "",
                                 "Subject": "",
                                 "MaximumMark": "",
@@ -129,21 +147,39 @@ const QualificationFormScreen = ({ route, navigation }) => {
                                 "StudentId": studentId,
                                 "IsActive": true,
                                 "CreatedAt": null,
+                                "CreatedBy": user.userId,
+                                "LastUpdatedBy": null,
                             })
-                            navigation.navigate('Home')
+                            navigation.goBack();
                         }
                     })
-                    .catch(err => console.error('Qualification Add error :', err));
+                    .catch((err) => {
+                        console.error('Qualification Add error :', err);
+                        Toast.show({
+                            type: 'error',
+                            text1: `${err}`,
+                            position: 'bottom',
+                            visibilityTime: 2000,
+                            autoHide: true,
+                        });
+                    });
             }
         }
         catch (error) {
             console.error('Error saving Qualification:', error);
+            Toast.show({
+                type: 'error',
+                text1: `${error}`,
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
         }
     }
 
     const handleCancel = () => {
         setStudentQualification({
-            "Id": 0,
+            "StudentQualificationId": 0,
             "QualificationId": "",
             "Subject": "",
             "MaximumMark": "",
@@ -153,11 +189,13 @@ const QualificationFormScreen = ({ route, navigation }) => {
             "StudentId": studentId,
             "IsActive": true,
             "CreatedAt": null,
+            "CreatedBy": user.userId,
+            "LastUpdatedBy": null,
         })
         navigation.goBack();
     }
     return (
-        <View style={{ flex: 1, padding: 10, justifyContent: 'center'}}>
+        <View style={{ flex: 1, padding: 10, justifyContent: 'center' }}>
             <View style={{
                 backgroundColor: Colors.background,
                 borderRadius: 8,
@@ -194,13 +232,13 @@ const QualificationFormScreen = ({ route, navigation }) => {
                         search
                         maxHeight={300}
                         labelField="qualificationName"
-                        valueField="id"
+                        valueField="qualificationId"
                         placeholder={!isFocus ? 'Select Qualification' : '...'}
                         searchPlaceholder="Search..."
                         value={studentQualification.QualificationId}
                         onFocus={() => setIsFocus(true)}
                         onBlur={() => setIsFocus(false)}
-                        onChange={(value) => setStudentQualification({ ...studentQualification, QualificationId: value.id })}
+                        onChange={(value) => setStudentQualification({ ...studentQualification, QualificationId: value.qualificationId })}
                     />
 
                     <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Subject :</Text>
@@ -280,7 +318,7 @@ const QualificationFormScreen = ({ route, navigation }) => {
                         }}
                         value={studentQualification.Grade}
                         onChangeText={(value) => handleInputChange('Grade', value)}
-                        placeholder="Enter Subject"
+                        placeholder="Enter Grade"
                     />
 
                     <TouchableOpacity style={{
@@ -290,7 +328,7 @@ const QualificationFormScreen = ({ route, navigation }) => {
                         marginTop: 10,
                         alignItems: 'center',
                     }} onPress={handleSaveStudentQualification}>
-                        <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentQualification.Id !== 0 ? "Save" : "Add"}</Text>
+                        <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentQualification.StudentQualificationId !== 0 ? "Save" : "Add"}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={{
                         backgroundColor: '#f25252',
@@ -302,6 +340,7 @@ const QualificationFormScreen = ({ route, navigation }) => {
                         <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>Cancel</Text>
                     </TouchableOpacity>
                 </ScrollView>
+                <Toast ref={(ref) => Toast.setRef(ref)} />
             </View>
         </View>
     );
@@ -397,4 +436,4 @@ const QualificationFormScreen = ({ route, navigation }) => {
 //     }
 // });
 
-export default QualificationFormScreen;
+export default StudentQualificationFormScreen;
