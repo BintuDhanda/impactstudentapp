@@ -93,7 +93,7 @@ const StudentTokenScreen = ({ navigation }) => {
       </View>
       {/* <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 16 }}>Is Valid For Admission : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.isValidForAdmissionNonMapped}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.isValidForAdmissionNonMapped == "False" ? "No" : "Yes"}</Text>
       </View> */}
     </View>
   );

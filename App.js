@@ -52,7 +52,11 @@ function MainTabNavigator() {
         tabBarStyle: {
           backgroundColor: Colors.background,
           borderTopWidth: 1,
+          borderTopRightRadius: 30,
+          borderTopLeftRadius: 30,
           borderTopColor: 'lightgray',
+          height: "8%",
+          paddingBottom: 10
         },
       }}>
       <Tab.Screen
@@ -70,7 +74,7 @@ function MainTabNavigator() {
         name="Tokens"
         component={StudentTokenScreen}
         options={{
-          tabBarLabel: 'Token',
+          tabBarLabel: 'Tokens',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="certificate" color={Colors.primary} size={30} />
@@ -81,7 +85,7 @@ function MainTabNavigator() {
         name="Addresses"
         component={AddressScreen}
         options={{
-          tabBarLabel: 'Address',
+          tabBarLabel: 'Addresses',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="map-marker" color={Colors.primary} size={30} />
@@ -92,7 +96,7 @@ function MainTabNavigator() {
         name="Qualifications"
         component={StudentQualificationScreen}
         options={{
-          tabBarLabel: 'Qualification',
+          tabBarLabel: 'Qualifications',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="graduation-cap" color={Colors.primary} size={30} />
@@ -103,7 +107,7 @@ function MainTabNavigator() {
         name="Batches"
         component={StudentBatchScreen}
         options={{
-          tabBarLabel: 'Batch',
+          tabBarLabel: 'Batches',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
             <Icon name="users" color={Colors.primary} size={30} />
