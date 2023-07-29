@@ -131,7 +131,7 @@ const AddressScreen = ({ navigation }) => {
         padding: 16,
         justifyContent: 'center'
       }}>
-        <TouchableOpacity style={{
+        {/* <TouchableOpacity style={{
           backgroundColor: Colors.primary,
           borderRadius: 5,
           paddingVertical: 10,
@@ -144,7 +144,7 @@ const AddressScreen = ({ navigation }) => {
             fontWeight: 'bold',
             textAlign: 'center'
           }}>Add Address</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {showDelete && (
           <Modal transparent visible={showDelete}>

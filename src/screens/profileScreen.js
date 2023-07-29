@@ -66,20 +66,20 @@ const ProfileScreen = ({ route, navigation }) => {
                 console.log(result.data, "studentDetailsByUserId");
                 setStudentDetails(
                     {
-                        StudentId: result.data.studentId?result.data.studentId:0,
-                        StudentImage: result.data.studentImage?result.data.studentImage:null,
-                        FirstName: result.data.firstName?result.data.firstName:"",
-                        LastName: result.data.lastName?result.data.lastName:"",
-                        FatherName: result.data.fatherName?result.data.fatherName:"",
-                        MotherName: result.data.motherName?result.data.motherName:"",
-                        Gender: result.data.gender?result.data.gender:"",
-                        StudentHeight: result.data.studentHeight? result.data.studentHeight.toString():"",
-                        StudentWeight: result.data.studentWeight?result.data.studentWeight.toString():"",
-                        BodyRemark: result.data.bodyRemark?result.data.bodyRemark:"",
-                        UserId: result.data.userId?result.data.userId:userId,
-                        IsActive: result.data.isActive?result.data.isActive:true,
-                        CreatedAt: result.data.createdAt?result.data.createdAt:null,
-                        CreatedBy: result.data.createdBy?result.data.createdBy:user == null ? 0 : user.userId,
+                        StudentId: result.data.studentId ? result.data.studentId : 0,
+                        StudentImage: result.data.studentImage ? result.data.studentImage : null,
+                        FirstName: result.data.firstName ? result.data.firstName : "",
+                        LastName: result.data.lastName ? result.data.lastName : "",
+                        FatherName: result.data.fatherName ? result.data.fatherName : "",
+                        MotherName: result.data.motherName ? result.data.motherName : "",
+                        Gender: result.data.gender ? result.data.gender : "",
+                        StudentHeight: result.data.studentHeight ? result.data.studentHeight.toString() : "",
+                        StudentWeight: result.data.studentWeight ? result.data.studentWeight.toString() : "",
+                        BodyRemark: result.data.bodyRemark ? result.data.bodyRemark : "",
+                        UserId: result.data.userId ? result.data.userId : userId,
+                        IsActive: result.data.isActive ? result.data.isActive : true,
+                        CreatedAt: result.data.createdAt ? result.data.createdAt : null,
+                        CreatedBy: result.data.createdBy ? result.data.createdBy : user == null ? 0 : user.userId,
                         LastUpdatedBy: user == null ? 0 : user.userId,
                     }
                 );
@@ -339,7 +339,42 @@ const ProfileScreen = ({ route, navigation }) => {
                             </TouchableOpacity>
                         </>
                         : null}
-                    <View style={{ justifyContent: "center", marginTop: 30, marginBottom: 20 }}>
+
+                    <TouchableOpacity style={{
+                        backgroundColor: Colors.primary,
+                        borderRadius: 5,
+                        paddingVertical: 10,
+                        paddingHorizontal: 20,
+                        marginBottom: 20,
+                        marginTop:10
+                    }}
+                        onPress={() => navigation.navigate('StudentAddressScreen')}
+                    >
+                        <Text style={{
+                            color: Colors.background,
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            textAlign: 'center'
+                        }}>View My Address</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{
+                        backgroundColor: Colors.primary,
+                        borderRadius: 5,
+                        paddingVertical: 10,
+                        paddingHorizontal: 20,
+                        marginBottom: 20,
+                    }}
+                        onPress={() => navigation.navigate('StudentQualificationScreen')}
+                    >
+                        <Text style={{
+                            color: Colors.background,
+                            fontSize: 14,
+                            fontWeight: 'bold',
+                            textAlign: 'center'
+                        }}>View My Qualifications</Text>
+                    </TouchableOpacity>
+
+                    <View style={{ justifyContent: "center", marginTop: 10, marginBottom: 20 }}>
                         <TouchableOpacity onPress={handleLogOut}>
                             <Text style={{ color: '#1c8adb', fontSize: 16, alignSelf: 'center' }}>LogOut</Text>
                         </TouchableOpacity>

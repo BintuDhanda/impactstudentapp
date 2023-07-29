@@ -130,7 +130,7 @@ const StudentQualificationScreen = ({ navigation }) => {
         padding: 16,
         justifyContent: 'center'
       }}>
-        <TouchableOpacity style={{
+        {/* <TouchableOpacity style={{
           backgroundColor: Colors.primary,
           borderRadius: 5,
           paddingVertical: 10,
@@ -143,7 +143,7 @@ const StudentQualificationScreen = ({ navigation }) => {
             fontWeight: 'bold',
             textAlign: 'center'
           }}>Add Qualification</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {showDelete && (
           <Modal transparent visible={showDelete}>

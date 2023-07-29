@@ -8,10 +8,8 @@ import {
   View,
 } from 'react-native';
 import 'react-native-gesture-handler'
-
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import LogIn from './src/screens/loginScreen';
 import VerifyOTP from './src/screens/verifyotp'
 import Register from './src/screens/register'
@@ -20,114 +18,23 @@ import DrawerNavigator from './src/navigation/DrawerNavigator';
 import ForgotPassword from './src/screens/forgotPassword';
 import ForgotVerifyOtp from './src/screens/forgotVerifyOtp';
 import ForgotSetPassword from './src/screens/forgotSetPassword';
-import HomeScreen from './src/screens/home';
-import ProfileScreen from './src/screens/profileScreen';
 import Colors from './src/constants/Colors';
-import Icon from 'react-native-vector-icons/FontAwesome';
 import RegisterVerifyOtpScreen from './src/screens/registerVerifyOtpScreen';
 import NewsLikeScreen from './src/screens/news/newsLikeScreen';
 import NewsCommentScreen from './src/screens/news/newsCommentScreen';
-import StudentTokenScreen from './src/screens/token/studentTokenScreen';
 import StudentTokenFormScreen from './src/screens/token/studentTokenFormScreen';
-import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
 import StudentQualificationFormScreen from './src/screens/qualification/studentQualificationFormScreen';
-import AddressScreen from './src/screens/address/studentAddressScreen';
 import StudentAddressFormScreen from './src/screens/address/studentAddressFormScreen';
-import StudentBatchScreen from './src/screens/studentBatch/studentBatchScreen';
+import TabNavigator from './src/navigation/TabNavigator';
+import AddressScreen from './src/screens/address/studentAddressScreen';
+import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
 
 
 let isLogedIn = true;
 
 export const UserContext = React.createContext();
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
 
-function MainTabNavigator() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: Colors.accent,
-        tabBarInactiveTintColor: 'gray',
-        tabBarShowLabel: true,
-        tabBarStyle: {
-          backgroundColor: Colors.background,
-          borderTopWidth: 1,
-          borderTopRightRadius: 30,
-          borderTopLeftRadius: 30,
-          borderTopColor: 'lightgray',
-          height: "8%",
-          paddingBottom: 10
-        },
-      }}>
-      <Tab.Screen
-        name="Welcome!"
-        component={HomeScreen}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Tokens"
-        component={StudentTokenScreen}
-        options={{
-          tabBarLabel: 'Tokens',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="certificate" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Addresses"
-        component={AddressScreen}
-        options={{
-          tabBarLabel: 'Addresses',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="map-marker" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Qualifications"
-        component={StudentQualificationScreen}
-        options={{
-          tabBarLabel: 'Qualifications',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="graduation-cap" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Batches"
-        component={StudentBatchScreen}
-        options={{
-          tabBarLabel: 'Batches',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="users" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="user" color={Colors.primary} size={30} />
-          ),
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
 
 function App() {
   const [user, setUser] = useState();
@@ -167,12 +74,14 @@ function App() {
             {user ? (
               <NavigationContainer>
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="Main" component={MainTabNavigator} />
+                  <Stack.Screen name="Main" component={TabNavigator} />
                   <Stack.Screen name="NewsLikeScreen" options={{title: 'News Like', headerShown: true}} component={NewsLikeScreen} />
                   <Stack.Screen name="NewsCommentScreen" options={{title: 'News Comment', headerShown: true}} component={NewsCommentScreen} />
                   <Stack.Screen name="StudentTokenFormScreen" options={{title: 'Token Form', headerShown: true}} component={StudentTokenFormScreen} />
                   <Stack.Screen name="StudentQualificationFormScreen" options={{title: 'Qualification Form', headerShown: true}} component={StudentQualificationFormScreen} />
                   <Stack.Screen name="StudentAddressFormScreen" options={{title: 'Address Form', headerShown: true}} component={StudentAddressFormScreen} />
+                  <Stack.Screen name="StudentAddressScreen" options={{title:'My Address', headerShown: true}} component={AddressScreen} />
+                  <Stack.Screen name="StudentQualificationScreen" options={{title:'My Qualifications', headerShown: true}} component={StudentQualificationScreen} />
                 </Stack.Navigator>
               </NavigationContainer>
             )

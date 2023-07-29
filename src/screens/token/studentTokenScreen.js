@@ -116,7 +116,7 @@ const StudentTokenScreen = ({ navigation }) => {
             fontSize: 14,
             fontWeight: 'bold',
             textAlign: 'center'
-          }}>Apply Token</Text>
+          }}>Click Here to Apply For Token</Text>
         </TouchableOpacity>
 
         <FlatList

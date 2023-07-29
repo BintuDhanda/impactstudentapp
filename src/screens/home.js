@@ -94,7 +94,7 @@ const HomeScreen = ({navigation}) => {
                     <View style={{ flex: 1, alignItems: 'center' }}>
                         <SliderComponent />
                     </View>
-                    <Text style={{color: Colors.primary, fontSize: 20, fontWeight: "bold"}}>Latest News</Text>
+                    <Text style={{color: Colors.primary, fontSize: 20, fontWeight: "bold", marginTop:10, marginBottom:5}}>Latest News</Text>
                     <FlatList
                         data={newsList}
                         keyExtractor={(item) => item.newsId.toString()}
