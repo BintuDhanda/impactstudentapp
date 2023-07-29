@@ -33,7 +33,8 @@ const ForgotSetPassword = ({ route, navigation }) => {
         }
         else {
             httpPost("User/ForgotPassword", password).then((res) => {
-                if (res.data == true) {
+                console.log("Forgot", res.data)
+                if (res.data === "true") {
                     Alert.alert(
                         'Save Password',
                         'Password Save SuceesFully',

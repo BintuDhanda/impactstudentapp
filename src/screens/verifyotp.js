@@ -40,14 +40,22 @@ const VerifyOTP = ({ navigation }) => {
             // get user token api call
             httpPost("User/IsMobileConfirmed", { userMobile: mobile }).then((response) => {
                 if (response.data == true) {
-                    httpPost("User/login", { userMobile: mobile, userPassword: password }).then((response) => {
+                    httpPost("User/userlogin", { userMobile: mobile, userPassword: password }).then((response) => {
                         console.log(response.data, "Response")
-                        if (response.status === 200) {
+                        if (response.data === 0) {
+                            Toast.show({
+                                type: 'error',
+                                text1: "Invalid Password or Phone No. Try Again!",
+                                position: 'bottom',
+                                visibilityTime: 2000,
+                                autoHide: true,
+                            });
+                        } else {
                             AsyncStorage.setItem('user', JSON.stringify(response.data));
                             setUser(response.data);
                         }
                     }).catch((err) => {
-                        console.error("Login error :", err)
+                        console.error("UserLogin error :", err)
                         Toast.show({
                             type: 'error',
                             text1: `${err}`,
@@ -67,6 +75,15 @@ const VerifyOTP = ({ navigation }) => {
                     autoHide: true,
                 });
             })
+        }
+        else {
+            Toast.show({
+                type: 'error',
+                text1: "Invalid Otp!",
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
         }
     };
 

@@ -60,14 +60,22 @@ const LogIn = ({ navigation }) => {
                             });
                         })
                     } else {
-                        httpPost("User/login", { userMobile: phone, userPassword: password }).then((response) => {
+                        httpPost("User/userlogin", { userMobile: phone, userPassword: password }).then((response) => {
                             console.log(response.data, "Response")
-                            if (response.status === 200) {
+                            if (response.data.userId === 0) {
+                                Toast.show({
+                                    type: 'error',
+                                    text1: "Invalid Password or Phone No. Try Again!",
+                                    position: 'bottom',
+                                    visibilityTime: 2000,
+                                    autoHide: true,
+                                });
+                            } else {
                                 AsyncStorage.setItem('user', JSON.stringify(response.data));
                                 setUser(response.data);
                             }
                         }).catch((err) => {
-                            console.error("Login error :", err)
+                            console.error("UserLogin error :", err)
                             Toast.show({
                                 type: 'error',
                                 text1: `${err}`,

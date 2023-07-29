@@ -31,7 +31,16 @@ const ForgotVerifyOtp = ({ route, navigation }) => {
 
     const handleConfirmOtp = () => {
         if (otp == verifyOtp) {
-            navigation.navigate('login')
+            navigation.navigate('forgotSetPassword', { mobile: mobile })
+        }
+        else {
+            Toast.show({
+                type: 'error',
+                text1: "Invalid Otp!",
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
         }
     };
 

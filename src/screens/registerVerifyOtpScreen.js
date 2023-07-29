@@ -5,10 +5,8 @@ import { Post as httpPost } from '../constants/httpService';
 import Toast from 'react-native-toast-message';
 import { sendOTP } from '../constants/smsService';
 import Colors from "../constants/Colors";
-import { UserContext } from '../../App';
-import { useContext } from 'react';
 
-const RegisterVerifyOtpScreen = ({route, navigation }) => {
+const RegisterVerifyOtpScreen = ({ route, navigation }) => {
     const { verifyOtp, password, mobile } = route.params;
     const [otp, setOtp] = useState('');
     const [count, setCount] = useState(1)
@@ -51,6 +49,14 @@ const RegisterVerifyOtpScreen = ({route, navigation }) => {
                     autoHide: true,
                 });
             })
+        } else {
+            Toast.show({
+                type: 'error',
+                text1: "Invalid Otp!",
+                position: 'bottom',
+                visibilityTime: 2000,
+                autoHide: true,
+            });
         }
     };
 
