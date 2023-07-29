@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView, SafeAreaView } from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { Post as httpPost } from '../constants/httpService';
+import { Post as httpPost, Get as httpGet } from '../constants/httpService';
 import Toast from 'react-native-toast-message';
 import { sendOTP } from '../constants/smsService';
 import Colors from "../constants/Colors";
@@ -9,7 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserContext } from '../../App';
 import { useContext } from 'react';
 
-const VerifyOTP = ({ navigation }) => {
+const VerifyOTP = ({ navigation, route }) => {
     const { verifyOtp, mobile, password } = route.params;
     const [otp, setOtp] = useState('');
     const [count, setCount] = useState(1)
@@ -38,7 +38,9 @@ const VerifyOTP = ({ navigation }) => {
         console.log(otp, verifyOtp)
         if (otp == verifyOtp) {
             // get user token api call
-            httpPost("User/IsMobileConfirmed", { userMobile: mobile }).then((response) => {
+            console.log("Is Mobile Confirmed", mobile)
+            httpGet("User/IsMobileConfirmed?userMobile="+mobile).then((response) => {
+                console.log("Is Mobile Confirmed Response",response.data)
                 if (response.data == true) {
                     httpPost("User/userlogin", { userMobile: mobile, userPassword: password }).then((response) => {
                         console.log(response.data, "Response")
