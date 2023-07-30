@@ -44,7 +44,7 @@ const VerifyOTP = ({ navigation, route }) => {
                 if (response.data == true) {
                     httpPost("User/userlogin", { userMobile: mobile, userPassword: password }).then((response) => {
                         console.log(response.data, "Response")
-                        if (response.data === 0) {
+                        if (response.data === 0 || response.data.userId===0) {
                             Toast.show({
                                 type: 'error',
                                 text1: "Invalid Password or Phone No. Try Again!",
@@ -52,7 +52,8 @@ const VerifyOTP = ({ navigation, route }) => {
                                 visibilityTime: 2000,
                                 autoHide: true,
                             });
-                        } else {
+                        }                      
+                        else {
                             AsyncStorage.setItem('user', JSON.stringify(response.data));
                             setUser(response.data);
                         }
