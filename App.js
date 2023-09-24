@@ -28,6 +28,7 @@ import StudentAddressFormScreen from './src/screens/address/studentAddressFormSc
 import TabNavigator from './src/navigation/TabNavigator';
 import AddressScreen from './src/screens/address/studentAddressScreen';
 import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
+import StudentIdentitiesScreen from './src/screens/studentIdentities/studentIdentitiesScreen';
 
 
 let isLogedIn = true;
@@ -82,6 +83,7 @@ function App() {
                   <Stack.Screen name="StudentAddressFormScreen" options={{title: 'Address Form', headerShown: true}} component={StudentAddressFormScreen} />
                   <Stack.Screen name="StudentAddressScreen" options={{title:'My Address', headerShown: true}} component={AddressScreen} />
                   <Stack.Screen name="StudentQualificationScreen" options={{title:'My Qualifications', headerShown: true}} component={StudentQualificationScreen} />
+                  <Stack.Screen name="StudentIdentitiesScreen" options={{title:'My Identities', headerShown: true}} component={StudentIdentitiesScreen} />
                 </Stack.Navigator>
               </NavigationContainer>
             )

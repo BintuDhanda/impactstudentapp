@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
 import Colors from '../../constants/Colors';
 import Toast from 'react-native-toast-message';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { useFocusEffect } from '@react-navigation/native';
 import { Get as httpGet, GetStudentIdByUserId } from '../../constants/httpService';
 
-const StudentBatchScreen = () => {
+const StudentBatchScreen = ({navigation}) => {
   const [batchList, setBatchList] = useState([]);
 
   useFocusEffect(
@@ -32,6 +33,9 @@ const StudentBatchScreen = () => {
         });
       });
   }
+  const handleStudentIdentitiesNavigate = (studentBatchid) => {
+    navigation.navigate('StudentIdentitiesScreen', { studentBatchid: studentBatchid })
+  }
 
   const getFormattedDate = (datestring) => {
     const datetimeString = datestring;
@@ -41,6 +45,25 @@ const StudentBatchScreen = () => {
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
   }
+  const convertToIndianTimee = (datetimeString) => {
+    const utcDate = new Date(datetimeString);
+
+    // Convert to IST (Indian Standard Time)
+    // utcDate.setMinutes(utcDate.getMinutes() + 330); // IST is UTC+5:30
+
+    const istDate = new Intl.DateTimeFormat('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true, // Use 12-hour format with AM/PM
+    }).format(utcDate);
+
+    return istDate;
+}
 
   const renderBatchCard = ({ item }) => (
     <View style={{
@@ -63,7 +86,7 @@ const StudentBatchScreen = () => {
       </View>
       <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 16 }}>Date Of Join : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{getFormattedDate(item.dateOfJoin)}</Text>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{convertToIndianTimee(item.dateOfJoin)}</Text>
       </View>
       <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 16 }}>Registration Number : </Text>
@@ -72,6 +95,11 @@ const StudentBatchScreen = () => {
       <View style={{ flexDirection: 'row' }}>
         <Text style={{ fontSize: 16 }}>Token Number : </Text>
         <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.tokenNumber}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        <TouchableOpacity style={{ marginRight: 10, }} onPress={() => handleStudentIdentitiesNavigate(item.studentBatchId)}>
+          <Icon name="file" size={20} color={'#006E33'} style={{ marginLeft: 8, textAlignVertical: 'center' }} />
+        </TouchableOpacity>
       </View>
     </View>
   );

@@ -48,8 +48,8 @@ const HomeScreen = ({navigation}) => {
 
     const GetNewsList = () => {
         setLoading(true);
-        const filter = { "From": fromDate, "To": toDate, "Take": take, "Skip": skip, "NewsTitle": newsTitle, "CreatedBy": user.userId }
-        httpPost("News/get", filter)
+        const filter = {"Take": take, "Skip": skip, "CreatedBy": user.userId }
+        httpPost("News/getAllNews", filter)
             .then((result) => {
                 console.log(result.data, "news")
                 setLoading(false);
