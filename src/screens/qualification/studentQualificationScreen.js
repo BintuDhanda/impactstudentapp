@@ -113,14 +113,14 @@ const StudentQualificationScreen = ({ navigation }) => {
         <Text style={{ fontSize: 16 }}>Grade : </Text>
         <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.grade}</Text>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+      {/* <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <TouchableOpacity style={{ marginRight: 10, }} onPress={() => handleEditQualificationNavigate(item.studentQualificationId)}>
           <Icon name="pencil" size={20} color={'#5a67f2'} style={{ marginLeft: 8, textAlignVertical: 'center' }} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => { DeleteStudentQualificationIdConfirm(item.studentQualificationId); setShowDelete(true); }}>
           <Icon name="trash" size={20} color={'#f25252'} style={{ marginRight: 8, textAlignVertical: 'center' }} />
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 

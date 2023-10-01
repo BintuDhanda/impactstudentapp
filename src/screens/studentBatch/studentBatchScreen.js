@@ -99,6 +99,7 @@ const StudentBatchScreen = ({navigation}) => {
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <TouchableOpacity style={{ marginRight: 10, }} onPress={() => handleStudentIdentitiesNavigate(item.studentBatchId)}>
           <Icon name="file" size={20} color={'#006E33'} style={{ marginLeft: 8, textAlignVertical: 'center' }} />
+          <Text style={{color:"green"}}>Issued</Text>
         </TouchableOpacity>
       </View>
     </View>
