@@ -58,6 +58,13 @@ const StudentHostelRoomBadRentScreen = () => {
             style={{
               fontSize: 16,
               fontWeight: 'bold',
+            }}>
+            Hostel due
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: 'bold',
               color: item?.dueAmount > 0 ? 'red' : 'gray',
             }}>
             {item?.displayMessage}
