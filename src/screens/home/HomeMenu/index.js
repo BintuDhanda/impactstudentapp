@@ -12,8 +12,10 @@ const HomeMenu = () => {
       <TouchableOpacity
         onPress={() => navigation?.navigate(item?.path)}
         style={{
-          marginRight: 5,
+          marginRight: 10,
           borderRadius: 10,
+          borderWidth: 0.8,
+          borderColor: 'lightgray',
           alignItems: 'center',
           paddingVertical: 15,
           paddingHorizontal: 5,
@@ -28,13 +30,13 @@ const HomeMenu = () => {
             color: Colors.primary,
           }}
           name={item?.icon}
-          size={30}
+          size={25}
         />
         <Text
           style={{
             textAlign: 'center',
             flexWrap: 'nowrap',
-            fontSize: 16,
+            fontSize: 12,
             marginTop: 5,
             fontWeight: 'bold',
           }}>
@@ -48,7 +50,7 @@ const HomeMenu = () => {
       style={{
         margin: 5,
         marginTop: 10,
-        paddingHorizontal: 5,
+        padding: 5,
         backgroundColor: 'white',
         elevation: 1.5,
         borderRadius: 5,
