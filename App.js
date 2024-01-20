@@ -63,6 +63,7 @@ function App() {
 
   return (
     <>
+      <StatusBar backgroundColor={Colors.primary} />
       {isSpalsh ? (
         <View
           style={{
