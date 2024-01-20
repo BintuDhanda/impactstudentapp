@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Colors from '../constants/Colors';
 import HomeScreen from '../screens/home';
 import StudentTokenScreen from '../screens/token/studentTokenScreen';
@@ -8,41 +8,41 @@ import StudentQualificationScreen from '../screens/qualification/studentQualific
 import StudentBatchScreen from '../screens/studentBatch/studentBatchScreen';
 import ProfileScreen from '../screens/profileScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { ScrollView } from 'react-native'; // Import ScrollView
+import {ScrollView, View} from 'react-native'; // Import ScrollView
 import NoficationsScreen from '../screens/notfications/notificationsScreen';
+import {getGreeting} from '../helpers';
 
 const Tab = createBottomTabNavigator();
 
 function TabNavigator() {
   return (
-    <ScrollView 
-    horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{ flexGrow: 1 }} // Ensure the content stretches to fill the ScrollView
-    >
     <Tab.Navigator
+      sceneContainerStyle={{backgroundColor: 'white', paddingBottom: '17%'}}
       screenOptions={{
         tabBarActiveTintColor: Colors.accent,
         tabBarInactiveTintColor: 'gray',
         tabBarShowLabel: true,
         tabBarStyle: {
+          position: 'absolute',
+          paddingBottom: 10,
           backgroundColor: Colors.background,
           borderTopWidth: 1,
           borderTopRightRadius: 30,
           borderTopLeftRadius: 30,
           borderTopColor: 'lightgray',
-          height: "8%",
-          paddingBottom: 10
+          height: '9%',
         },
       }}>
       <Tab.Screen
-        name="Welcome!"
+        name="Home"
         component={HomeScreen}
         options={{
+          headerTitle: `Hi, ${getGreeting()} !`,
+          headerTitleStyle: {color: Colors.primary},
           tabBarLabel: 'Home',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="home" color={Colors.primary} size={30} />
+          tabBarLabelStyle: {fontSize: 15},
+          tabBarIcon: ({color, size}) => (
+            <Icon name="home" color={Colors.primary} size={25} />
           ),
         }}
       />
@@ -51,9 +51,9 @@ function TabNavigator() {
         component={StudentTokenScreen}
         options={{
           tabBarLabel: 'Tokens',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="certificate" color={Colors.primary} size={30} />
+          tabBarLabelStyle: {fontSize: 15},
+          tabBarIcon: ({color, size}) => (
+            <Icon name="certificate" color={Colors.primary} size={25} />
           ),
         }}
       />
@@ -64,7 +64,7 @@ function TabNavigator() {
           tabBarLabel: 'Addresses',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
-            <Icon name="map-marker" color={Colors.primary} size={30} />
+            <Icon name="map-marker" color={Colors.primary} size={25} />
           ),
         }}
       /> */}
@@ -75,7 +75,7 @@ function TabNavigator() {
           tabBarLabel: 'Qualifications',
           tabBarLabelStyle: { fontSize: 15 },
           tabBarIcon: ({ color, size }) => (
-            <Icon name="graduation-cap" color={Colors.primary} size={30} />
+            <Icon name="graduation-cap" color={Colors.primary} size={25} />
           ),
         }}
       /> */}
@@ -84,20 +84,20 @@ function TabNavigator() {
         component={StudentBatchScreen}
         options={{
           tabBarLabel: 'Batches',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="users" color={Colors.primary} size={30} />
+          tabBarLabelStyle: {fontSize: 15},
+          tabBarIcon: ({color, size}) => (
+            <Icon name="users" color={Colors.primary} size={25} />
           ),
         }}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="Nofications"
         component={NoficationsScreen}
         options={{
           tabBarLabel: 'Notifications',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="bell" color={Colors.primary} size={30} />
+          tabBarLabelStyle: {fontSize: 15},
+          tabBarIcon: ({color, size}) => (
+            <Icon name="bell" color={Colors.primary} size={25} />
           ),
         }}
       />
@@ -106,16 +106,14 @@ function TabNavigator() {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarLabelStyle: { fontSize: 15 },
-          tabBarIcon: ({ color, size }) => (
-            <Icon name="user" color={Colors.primary} size={30} />
+          tabBarLabelStyle: {fontSize: 15},
+          tabBarIcon: ({color, size}) => (
+            <Icon name="user" color={Colors.primary} size={25} />
           ),
         }}
       />
     </Tab.Navigator>
-    </ScrollView>
   );
 }
-
 
 export default TabNavigator;

@@ -1,129 +1,177 @@
-import { UserContext } from '../../../App';
-import React, { useEffect, useState, useContext } from 'react';
-import { StyleSheet, Text, View, FlatList, ScrollView, Modal, Alert, TouchableOpacity } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
+import {UserContext} from '../../../App';
+import React, {useEffect, useState, useContext} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  ScrollView,
+  Modal,
+  Alert,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import {Dropdown} from 'react-native-element-dropdown';
 import Colors from '../../constants/Colors';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useFocusEffect } from '@react-navigation/native';
-import { Get as httpGet, Post as httpPost } from '../../constants/httpService';
+import {useFocusEffect} from '@react-navigation/native';
+import {Get as httpGet, Post as httpPost} from '../../constants/httpService';
+const {height} = Dimensions.get('window');
 
-const StudentIdentitiesScreen = ({ route, navigation }) => {
-    const { user, setUser } = useContext(UserContext);
-    const { studentBatchid } = route.params;
-    const [identitiesList, setIdentitiesList] = useState([]);
-    const [studentIdentities, setStudentIdentities] = useState({ "StudentIdentitiesId": 0, "StudentBatchId": studentBatchid, "IdentityTypeId": 0, "StringStatus": "In-Active", "IsActive": true, "CreatedAt": null, "CreatedBy": user.userId, "LastUpdatedBy": null, });
-    const [identityTypeList, setIdentityTypeList] = useState([]);
-    const [isFocus, setIsFocus] = useState(false);
-    const [studentIdentitiesDeleteId, setStudentIdentitiesDeleteId] = useState(0);
-    const [showModal, setShowModal] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [showStatusDropdown, setShowStatusDropdown] = useState(false);
-    const toggleStatusDropdown = () => {
-        setShowStatusDropdown(!showStatusDropdown);
-    };
+const StudentIdentitiesScreen = ({route, navigation}) => {
+  const {user, setUser} = useContext(UserContext);
+  const {studentBatchid} = route.params || {};
+  const [identitiesList, setIdentitiesList] = useState([]);
+  const [studentIdentities, setStudentIdentities] = useState({
+    StudentIdentitiesId: 0,
+    StudentBatchId: studentBatchid,
+    IdentityTypeId: 0,
+    StringStatus: 'In-Active',
+    IsActive: true,
+    CreatedAt: null,
+    CreatedBy: user.userId,
+    LastUpdatedBy: null,
+  });
+  const [identityTypeList, setIdentityTypeList] = useState([]);
+  const [isFocus, setIsFocus] = useState(false);
+  const [studentIdentitiesDeleteId, setStudentIdentitiesDeleteId] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
+  const toggleStatusDropdown = () => {
+    setShowStatusDropdown(!showStatusDropdown);
+  };
 
-    const selectStatus = (selectedStatus) => {
-        setStudentIdentities((prevStudentIdentities) => ({
-            ...prevStudentIdentities,
-            StringStatus: selectedStatus,
-        }));
-        setShowStatusDropdown(false);
-    };
+  const selectStatus = selectedStatus => {
+    setStudentIdentities(prevStudentIdentities => ({
+      ...prevStudentIdentities,
+      StringStatus: selectedStatus,
+    }));
+    setShowStatusDropdown(false);
+  };
 
-    useFocusEffect(
-        React.useCallback(() => {
-            GetStudentIdentitiesByStudentId();
-        }, [])
-    );
+  useFocusEffect(
+    React.useCallback(() => {
+      GetStudentIdentitiesByStudentId();
+    }, []),
+  );
 
-    const GetStudentIdentitiesByStudentId = () => {
-        httpGet(`StudentIdentities/getStudentIdentitiesByStudentBatchId?Id=${studentBatchid}`)
-            .then((response) => {
-                console.log(response.data);
-                setIdentitiesList(response.data);
-            })
-            .catch((error) => {
-                console.error(error, "Get Student Identities By Student Batch Id Error");
-                Toast.show({
-                    type: 'error',
-                    text1: `${error}`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                    autoHide: true,
-                });
-            });
+  const GetStudentIdentitiesByStudentId = () => {
+    if (!studentBatchid) {
+      return;
     }
+    httpGet(
+      `StudentIdentities/getStudentIdentitiesByStudentBatchId?Id=${studentBatchid}`,
+    )
+      .then(response => {
+        console.log(response.data);
+        setIdentitiesList(response.data);
+      })
+      .catch(error => {
+        console.error(
+          error,
+          'Get Student Identities By Student Batch Id Error',
+        );
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      });
+  };
 
-    const convertToIndianTimee = (datetimeString) => {
-        const utcDate = new Date(datetimeString);
+  const convertToIndianTimee = datetimeString => {
+    const utcDate = new Date(datetimeString);
 
-        // Convert to IST (Indian Standard Time)
-        // utcDate.setMinutes(utcDate.getMinutes() + 330); // IST is UTC+5:30
+    // Convert to IST (Indian Standard Time)
+    // utcDate.setMinutes(utcDate.getMinutes() + 330); // IST is UTC+5:30
 
-        const istDate = new Intl.DateTimeFormat('en-IN', {
-            timeZone: 'Asia/Kolkata',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true, // Use 12-hour format with AM/PM
-        }).format(utcDate);
+    const istDate = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true, // Use 12-hour format with AM/PM
+    }).format(utcDate);
 
-        return istDate;
-    }
+    return istDate;
+  };
 
-    const renderIdentitiesCard = ({ item }) => (
-        <View style={{
-            justifyContent: 'space-between',
-            backgroundColor: Colors.background,
-            borderRadius: 10,
-            padding: 10,
-            marginBottom: 10,
-            shadowColor: Colors.shadow,
-            shadowOffset: { width: 10, height: 2 },
-            shadowOpacity: 4,
-            shadowRadius: 10,
-            elevation: 10,
-            borderWidth: 1.5,
-            borderColor: Colors.primary,
-        }}>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: 16 }}>Identities Name : </Text>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.identityTypeName}</Text>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: 16 }}>Student Batch Name : </Text>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.studentBatchName}</Text>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: 16 }}>Status : </Text>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.stringStatus}</Text>
-            </View>
-            <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: 16 }}>Date & Time : </Text>
-                <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{convertToIndianTimee(item.createdAt)}</Text>
-            </View>
-        </View>
-    );
+  const renderIdentitiesCard = ({item}) => (
+    <View
+      style={{
+        justifyContent: 'space-between',
+        backgroundColor: Colors.background,
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+        shadowColor: Colors.shadow,
+        shadowOffset: {width: 10, height: 2},
+        shadowOpacity: 4,
+        shadowRadius: 10,
+        elevation: 10,
+        borderWidth: 1.5,
+        borderColor: Colors.primary,
+      }}>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Identities Name : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.identityTypeName}
+        </Text>
+      </View>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Student Batch Name : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.studentBatchName}
+        </Text>
+      </View>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Status : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.stringStatus}
+        </Text>
+      </View>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Date & Time : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {convertToIndianTimee(item.createdAt)}
+        </Text>
+      </View>
+    </View>
+  );
 
-    return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={{
-                padding: 16,
-                justifyContent: 'center'
+  return (
+    <View
+      style={{
+        padding: 16,
+        justifyContent: 'center',
+        flex: 1,
+      }}>
+      <FlatList
+        data={identitiesList}
+        keyExtractor={item => item.studentIdentitiesId.toString()}
+        renderItem={renderIdentitiesCard}
+        ListEmptyComponent={
+          <View
+            style={{
+              flex: 1,
+              height: height / 1.25,
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
-                <FlatList
-                    data={identitiesList}
-                    keyExtractor={(item) => item.studentIdentitiesId.toString()}
-                    renderItem={renderIdentitiesCard}
-                />
-                <Toast ref={(ref) => Toast.setRef(ref)} />
-            </View>
-        </ScrollView>
-    );
+            <Text style={{fontSize: 18}}>No identities found</Text>
+          </View>
+        }
+      />
+      <Toast ref={ref => Toast.setRef(ref)} />
+    </View>
+  );
 };
 
 export default StudentIdentitiesScreen;

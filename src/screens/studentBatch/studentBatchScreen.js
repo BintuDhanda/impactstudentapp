@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import Colors from '../../constants/Colors';
 import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useFocusEffect } from '@react-navigation/native';
-import { Get as httpGet, GetStudentIdByUserId } from '../../constants/httpService';
+import {useFocusEffect} from '@react-navigation/native';
+import {
+  Get as httpGet,
+  GetStudentIdByUserId,
+} from '../../constants/httpService';
 
 const StudentBatchScreen = ({navigation}) => {
   const [batchList, setBatchList] = useState([]);
@@ -12,18 +22,20 @@ const StudentBatchScreen = ({navigation}) => {
   useFocusEffect(
     React.useCallback(() => {
       GetStudentBatchByStudentId();
-    }, [])
+    }, []),
   );
 
   const GetStudentBatchByStudentId = async () => {
     const studentId = await GetStudentIdByUserId();
-    httpGet(`StudentBatch/getStudentBatchByStudentId?Id=${studentId.data.studentId}`)
-      .then((response) => {
+    httpGet(
+      `StudentBatch/getStudentBatchByStudentId?Id=${studentId.data.studentId}`,
+    )
+      .then(response => {
         console.log(response.data);
         setBatchList(response.data);
       })
-      .catch((error) => {
-        console.error(error, "Get Student Batch By Student Id Error");
+      .catch(error => {
+        console.error(error, 'Get Student Batch By Student Id Error');
         Toast.show({
           type: 'error',
           text1: `${error}`,
@@ -32,94 +44,110 @@ const StudentBatchScreen = ({navigation}) => {
           autoHide: true,
         });
       });
-  }
-  const handleStudentIdentitiesNavigate = (studentBatchid) => {
-    navigation.navigate('StudentIdentitiesScreen', { studentBatchid: studentBatchid })
-  }
+  };
+  const handleStudentIdentitiesNavigate = studentBatchid => {
+    navigation.navigate('StudentIdentitiesScreen', {
+      studentBatchid: studentBatchid,
+    });
+  };
 
-  const getFormattedDate = (datestring) => {
+  const getFormattedDate = datestring => {
     const datetimeString = datestring;
     const date = new Date(datetimeString);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
-  }
-  const convertToIndianTimee = (datetimeString) => {
+  };
+  const convertToIndianTimee = datetimeString => {
     const utcDate = new Date(datetimeString);
 
     // Convert to IST (Indian Standard Time)
     // utcDate.setMinutes(utcDate.getMinutes() + 330); // IST is UTC+5:30
 
     const istDate = new Intl.DateTimeFormat('en-IN', {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true, // Use 12-hour format with AM/PM
+      timeZone: 'Asia/Kolkata',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true, // Use 12-hour format with AM/PM
     }).format(utcDate);
 
     return istDate;
-}
+  };
 
-  const renderBatchCard = ({ item }) => (
-    <View style={{
-      justifyContent: 'space-between',
-      backgroundColor: Colors.background,
-      borderRadius: 10,
-      padding: 10,
-      marginBottom: 10,
-      shadowColor: Colors.shadow,
-      shadowOffset: { width: 10, height: 2 },
-      shadowOpacity: 4,
-      shadowRadius: 10,
-      elevation: 10,
-      borderWidth: 1.5,
-      borderColor: Colors.primary,
-    }}>
-      <View style={{ flexDirection: 'row' }}>
-        <Text style={{ fontSize: 16 }}>Batch Name : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.batchName}</Text>
+  const renderBatchCard = ({item}) => (
+    <View
+      style={{
+        justifyContent: 'space-between',
+        backgroundColor: Colors.background,
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 10,
+        shadowColor: Colors.shadow,
+        shadowOffset: {width: 10, height: 2},
+        shadowOpacity: 4,
+        shadowRadius: 10,
+        elevation: 10,
+        borderWidth: 1.5,
+        borderColor: Colors.primary,
+      }}>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Batch Name : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.batchName}
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row' }}>
-        <Text style={{ fontSize: 16 }}>Date Of Join : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{convertToIndianTimee(item.dateOfJoin)}</Text>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Date Of Join : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {convertToIndianTimee(item.dateOfJoin)}
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row' }}>
-        <Text style={{ fontSize: 16 }}>Registration Number : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.registrationNumber}</Text>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Registration Number : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.registrationNumber}
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row' }}>
-        <Text style={{ fontSize: 16 }}>Token Number : </Text>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', marginBottom: 8 }}>{item.tokenNumber}</Text>
+      <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>Token Number : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.tokenNumber}
+        </Text>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-        <TouchableOpacity style={{ marginRight: 10, }} onPress={() => handleStudentIdentitiesNavigate(item.studentBatchId)}>
-          <Icon name="file" size={20} color={'#006E33'} style={{ marginLeft: 8, textAlignVertical: 'center' }} />
-          <Text style={{color:"green"}}>Issued</Text>
+      <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
+        <TouchableOpacity
+          style={{marginRight: 10}}
+          onPress={() => handleStudentIdentitiesNavigate(item?.studentBatchId)}>
+          <Icon
+            name="file"
+            size={20}
+            color={'#006E33'}
+            style={{marginLeft: 8, textAlignVertical: 'center'}}
+          />
+          <Text style={{color: 'green'}}>Issued</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <View style={{
+    <View
+      style={{
         padding: 16,
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}>
-
-        <FlatList
-          data={batchList}
-          keyExtractor={(item) => item.studentBatchId.toString()}
-          renderItem={renderBatchCard}
-        />
-        <Toast ref={(ref) => Toast.setRef(ref)} />
-      </View>
-    </ScrollView>
+      <FlatList
+        data={batchList}
+        keyExtractor={item => item?.studentBatchId?.toString()}
+        renderItem={renderBatchCard}
+      />
+      <Toast ref={ref => Toast.setRef(ref)} />
+    </View>
   );
 };
 

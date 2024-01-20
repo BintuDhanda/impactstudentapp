@@ -83,8 +83,9 @@ const StudentHostelRoomBadRentScreen = () => {
   };
 
   return (
-    <View style={{padding: 5}}>
+    <View style={{}}>
       <FlatList
+        style={{padding: 5}}
         data={hostelRoomBadStudentList}
         renderItem={renderHostelRoomBadStudentCard}
         keyExtractor={item => item.hostelName.toString()}

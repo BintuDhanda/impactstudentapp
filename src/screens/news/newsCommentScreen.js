@@ -1,365 +1,419 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, FlatList, Alert, ScrollView } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  FlatList,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import Colors from '../../constants/Colors';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
-import { Get as httpGet, Post as httpPost } from '../../constants/httpService';
-import { UserContext } from '../../../App';
-import { useContext } from 'react';
+import {Get as httpGet, Post as httpPost} from '../../constants/httpService';
+import {UserContext} from '../../../App';
+import {useContext} from 'react';
 import NewsCommentCard from '../../components/newsCommentCard';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 
-const NewsCommentScreen = ({ route }) => {
-    const { newsId } = route.params;
-    const { user, setUser } = useContext(UserContext);
-    const [newsComment, setNewsComment] = useState({ "NewsCommentId": 0, "Comment": "", "NewsId": newsId, "IsActive": true, "CreatedAt": null, "CreatedBy": user.userId, "LastUpdatedBy": null, });
-    const [newsCommentList, setNewsCommentList] = useState([]);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [newsCommentDeleteId, setNewsCommentDeleteId] = useState(0);
-    const [showDelete, setShowDelete] = useState(false);
-    
-    useFocusEffect(
-        React.useCallback(() => {
-            GetNewsCommentList();
-        }, [])
-      );
+const NewsCommentScreen = ({route}) => {
+  const {newsId} = route.params;
+  const {user, setUser} = useContext(UserContext);
+  const [newsComment, setNewsComment] = useState({
+    NewsCommentId: 0,
+    Comment: '',
+    NewsId: newsId,
+    IsActive: true,
+    CreatedAt: null,
+    CreatedBy: user.userId,
+    LastUpdatedBy: null,
+  });
+  const [newsCommentList, setNewsCommentList] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newsCommentDeleteId, setNewsCommentDeleteId] = useState(0);
+  const [showDelete, setShowDelete] = useState(false);
 
-    const GetNewsCommentList = () => {
-        httpGet(`NewsComment/getNewsCommentByNewsId?NewsId=${newsId}`)
-            .then((result) => {
-                console.log(result.data)
-                setNewsCommentList(result.data)
-            })
-            .catch((err) => {
-                console.log('Get News Comment error :', err);
-                Toast.show({
-                    type: 'error',
-                    text1: `${err}`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                    autoHide: true,
-                });
-            })
-    }
-    const handleAddNewsComment = () => {
-        setNewsComment({
-            NewsCommentId: 0,
-            Comment: "",
-            NewsId: newsId,
-            CreatedBy: user.userId,
-            IsActive: true,
-            CreatedAt: null,
-            CreatedBy: user.userId,
-            LastUpdatedBy: null,
+  useFocusEffect(
+    React.useCallback(() => {
+      GetNewsCommentList();
+    }, []),
+  );
+
+  const GetNewsCommentList = () => {
+    httpGet(`NewsComment/getNewsCommentByNewsId?NewsId=${newsId}`)
+      .then(result => {
+        console.log(result.data);
+        setNewsCommentList(result.data);
+      })
+      .catch(err => {
+        console.log('Get News Comment error :', err);
+        Toast.show({
+          type: 'error',
+          text1: `${err}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
         });
-        setModalVisible(true);
-    };
+      });
+  };
+  const handleAddNewsComment = () => {
+    setNewsComment({
+      NewsCommentId: 0,
+      Comment: '',
+      NewsId: newsId,
+      CreatedBy: user.userId,
+      IsActive: true,
+      CreatedAt: null,
+      CreatedBy: user.userId,
+      LastUpdatedBy: null,
+    });
+    setModalVisible(true);
+  };
 
-    const handleSaveNewsComment = () => {
-        try {
-            if (newsComment.NewsCommentId !== 0) {
-                httpPost("NewsComment/put", newsComment)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            GetNewsCommentList();
-                            Alert.alert('Sucees', 'Update News Comment Successfully')
-                            setNewsComment({
-                                "NewsCommentId": 0,
-                                "Comment": "",
-                                "NewsId": newsId,
-                                "CreatedBy": user.userId,
-                                "IsActive": true,
-                                "CreatedAt": null,
-                                "CreatedBy": user.userId,
-                                "LastUpdatedBy": null,
-                            })
-                        }
-                    })
-                    .catch((err) => {
-                        console.log("News Comment update error : ", err);
-                        Toast.show({
-                            type: 'error',
-                            text1: `${err}`,
-                            position: 'bottom',
-                            visibilityTime: 2000,
-                            autoHide: true,
-                        });
-                    });
+  const handleSaveNewsComment = () => {
+    try {
+      if (newsComment.NewsCommentId !== 0) {
+        httpPost('NewsComment/put', newsComment)
+          .then(response => {
+            if (response.status === 200) {
+              GetNewsCommentList();
+              Alert.alert('Sucees', 'Update News Comment Successfully');
+              setNewsComment({
+                NewsCommentId: 0,
+                Comment: '',
+                NewsId: newsId,
+                CreatedBy: user.userId,
+                IsActive: true,
+                CreatedAt: null,
+                CreatedBy: user.userId,
+                LastUpdatedBy: null,
+              });
             }
-            else {
-                httpPost("NewsComment/post", newsComment)
-                    .then((response) => {
-                        if (response.status === 200) {
-                            GetNewsCommentList();
-                            Alert.alert('Success', 'Add News Comment Successfully')
-                            setNewsComment({
-                                "NewsCommentId": 0,
-                                "Comment": "",
-                                "NewsId": newsId,
-                                "CreatedBy": user.userId,
-                                "IsActive": true,
-                                "CreatedAt": null,
-                                "CreatedBy": user.userId,
-                                "LastUpdatedBy": null,
-                            })
-                        }
-                    })
-                    .catch((err) => {
-                        console.log('News Comment Add error :', err);
-                        Toast.show({
-                            type: 'error',
-                            text1: `${err}`,
-                            position: 'bottom',
-                            visibilityTime: 2000,
-                            autoHide: true,
-                        });
-                    });
-            }
-            setModalVisible(false);
-        }
-        catch (error) {
-            console.log('Error saving News Comment:', error);
+          })
+          .catch(err => {
+            console.log('News Comment update error : ', err);
             Toast.show({
-                type: 'error',
-                text1: `${error}`,
-                position: 'bottom',
-                visibilityTime: 2000,
-                autoHide: true,
+              type: 'error',
+              text1: `${err}`,
+              position: 'bottom',
+              visibilityTime: 2000,
+              autoHide: true,
             });
-        }
+          });
+      } else {
+        httpPost('NewsComment/post', newsComment)
+          .then(response => {
+            if (response.status === 200) {
+              GetNewsCommentList();
+              Alert.alert('Success', 'Add News Comment Successfully');
+              setNewsComment({
+                NewsCommentId: 0,
+                Comment: '',
+                NewsId: newsId,
+                CreatedBy: user.userId,
+                IsActive: true,
+                CreatedAt: null,
+                CreatedBy: user.userId,
+                LastUpdatedBy: null,
+              });
+            }
+          })
+          .catch(err => {
+            console.log('News Comment Add error :', err);
+            Toast.show({
+              type: 'error',
+              text1: `${err}`,
+              position: 'bottom',
+              visibilityTime: 2000,
+              autoHide: true,
+            });
+          });
+      }
+      setModalVisible(false);
+    } catch (error) {
+      console.log('Error saving News Comment:', error);
+      Toast.show({
+        type: 'error',
+        text1: `${error}`,
+        position: 'bottom',
+        visibilityTime: 2000,
+        autoHide: true,
+      });
     }
+  };
 
-    const DeleteNewsCommentIdConfirm = (newsCommentid) => {
-        setNewsCommentDeleteId(newsCommentid);
-    }
+  const DeleteNewsCommentIdConfirm = newsCommentid => {
+    setNewsCommentDeleteId(newsCommentid);
+  };
 
-    const DeleteNewsCommentIdConfirmYes = () => {
-        httpGet(`NewsComment/delete?Id=${newsCommentDeleteId}`)
-            .then((result) => {
-                console.log(result);
-                GetNewsCommentList();
-                setNewsCommentDeleteId(0);
-                setShowDelete(false);
-            })
-            .catch((error) => {
-                console.error('Delete NewsComment error', error);
-                Toast.show({
-                    type: 'error',
-                    text1: `${error}`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                    autoHide: true,
-                });
-            })
-    }
-
-    const DeleteNewsCommentIdConfirmNo = () => {
+  const DeleteNewsCommentIdConfirmYes = () => {
+    httpGet(`NewsComment/delete?Id=${newsCommentDeleteId}`)
+      .then(result => {
+        console.log(result);
+        GetNewsCommentList();
         setNewsCommentDeleteId(0);
         setShowDelete(false);
-    }
+      })
+      .catch(error => {
+        console.error('Delete NewsComment error', error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      });
+  };
 
-    const handleEditNewsComment = (newsCommentId) => {
-        httpGet(`NewsComment/getById?Id=${newsCommentId}`)
-            .then((response) => {
-                setNewsComment({
-                    NewsCommentId: response.data.newsCommentId,
-                    Comment: response.data.comment,
-                    NewsId: response.data.newsId,
-                    CreatedBy: response.data.createdBy,
-                    IsActive: response.data.isActive,
-                    CreatedAt: response.data.createdAt,
-                    CreatedBy: response.data.createdBy,
-                    LastUpdatedBy: user.userId,
-                })
-            })
-            .catch((error) => {
-                console.log('News Comment Get By Id :', error);
-                Toast.show({
-                    type: 'error',
-                    text1: `${error}`,
-                    position: 'bottom',
-                    visibilityTime: 2000,
-                    autoHide: true,
-                });
-            })
-        setModalVisible(true);
-    };
+  const DeleteNewsCommentIdConfirmNo = () => {
+    setNewsCommentDeleteId(0);
+    setShowDelete(false);
+  };
 
-    const handleClose = () => {
-        setModalVisible(false);
-        GetNewsCommentList();
-    }
+  const handleEditNewsComment = newsCommentId => {
+    httpGet(`NewsComment/getById?Id=${newsCommentId}`)
+      .then(response => {
+        setNewsComment({
+          NewsCommentId: response.data.newsCommentId,
+          Comment: response.data.comment,
+          NewsId: response.data.newsId,
+          CreatedBy: response.data.createdBy,
+          IsActive: response.data.isActive,
+          CreatedAt: response.data.createdAt,
+          CreatedBy: response.data.createdBy,
+          LastUpdatedBy: user.userId,
+        });
+      })
+      .catch(error => {
+        console.log('News Comment Get By Id :', error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      });
+    setModalVisible(true);
+  };
 
-    // const renderNewsCommentCard = ({ item }) => {
-    //     return (
-    //         <View style={{
-    //             flexDirection: 'row',
-    //             backgroundColor: Colors.background,
-    //             borderRadius: 10,
-    //             padding: 5,
-    //             marginBottom: 10,
-    //             shadowColor: Colors.primary,
-    //             shadowOffset: { width: 5, height: 5 },
-    //             shadowOpacity: 5,
-    //             shadowRadius: 10,
-    //             elevation: 10,
-    //             borderWidth: 1.5,
-    //             borderColor: "grey",
-    //             alignItems: 'center'
-    //         }}>
+  const handleClose = () => {
+    setModalVisible(false);
+    GetNewsCommentList();
+  };
 
-    //             <View style={{ flexDirection: 'row', justifyContent: 'center', alignContent: 'center' }}>
-    //                 <Text style={{ fontSize: 20, fontWeight: 'bold', borderRadius: 50, borderWidth: 1.5, borderColor: Colors.primary, color: Colors.secondary, padding: 8, marginRight: 10 }}>{item.userName}</Text>
-    //             </View>
+  // const renderNewsCommentCard = ({ item }) => {
+  //     return (
+  //         <View style={{
+  //             flexDirection: 'row',
+  //             backgroundColor: Colors.background,
+  //             borderRadius: 10,
+  //             padding: 5,
+  //             marginBottom: 10,
+  //             shadowColor: Colors.primary,
+  //             shadowOffset: { width: 5, height: 5 },
+  //             shadowOpacity: 5,
+  //             shadowRadius: 10,
+  //             elevation: 10,
+  //             borderWidth: 1.5,
+  //             borderColor: "grey",
+  //             alignItems: 'center'
+  //         }}>
 
-    //             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-    //                 <View style={{ justifyContent: 'center', alignItems: 'flex-start', width: '80%' }}>
-    //                     <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.comment}</Text>
-    //                 </View>
-    //             </View>
-    //         </View >
-    //     );
-    // };
+  //             <View style={{ flexDirection: 'row', justifyContent: 'center', alignContent: 'center' }}>
+  //                 <Text style={{ fontSize: 20, fontWeight: 'bold', borderRadius: 50, borderWidth: 1.5, borderColor: Colors.primary, color: Colors.secondary, padding: 8, marginRight: 10 }}>{item.userName}</Text>
+  //             </View>
 
-    return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={{ flex: 1, padding: 20, }}>
-                <TouchableOpacity style={{
+  //             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+  //                 <View style={{ justifyContent: 'center', alignItems: 'flex-start', width: '80%' }}>
+  //                     <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{item.comment}</Text>
+  //                 </View>
+  //             </View>
+  //         </View >
+  //     );
+  // };
+
+  return (
+    <View style={{flex: 1, padding: 20}}>
+      <FlatList
+        data={newsCommentList}
+        ListHeaderComponent={
+          <TouchableOpacity
+            style={{
+              backgroundColor: Colors.primary,
+              borderRadius: 5,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+              marginBottom: 20,
+            }}
+            onPress={handleAddNewsComment}>
+            <Text
+              style={{
+                color: Colors.background,
+                fontSize: 16,
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}>
+              Add News Comment
+            </Text>
+          </TouchableOpacity>
+        }
+        keyExtractor={item => item.newsCommentId.toString()}
+        showsVerticalScrollIndicator={false}
+        renderItem={item => (
+          <NewsCommentCard
+            item={item}
+            ondelete={DeleteNewsCommentIdConfirm}
+            onEdit={handleEditNewsComment}
+            showDelete={setShowDelete}
+            showModelVisible={setModalVisible}
+            recordEmpty={setNewsCommentList}
+          />
+        )}
+      />
+      {showDelete && (
+        <Modal transparent visible={showDelete}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <View
+              style={{
+                backgroundColor: Colors.background,
+                borderRadius: 10,
+                padding: 28,
+                shadowColor: Colors.shadow,
+                width: '80%',
+              }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  marginBottom: 5,
+                  alignSelf: 'center',
+                  fontWeight: 'bold',
+                }}>
+                Are You Sure You Want To Delete
+              </Text>
+
+              <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+                <TouchableOpacity
+                  style={{
                     backgroundColor: Colors.primary,
                     borderRadius: 5,
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
-                    marginBottom: 20,
-                }} onPress={handleAddNewsComment}>
-                    <Text style={{
-                        color: Colors.background,
-                        fontSize: 16,
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                    }}>Add News Comment</Text>
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    marginTop: 10,
+                    marginRight: 3,
+                  }}
+                  onPress={() => {
+                    DeleteNewsCommentIdConfirmYes();
+                  }}>
+                  <Text style={{fontSize: 16, color: Colors.background}}>
+                    Yes
+                  </Text>
                 </TouchableOpacity>
-                
-                {showDelete && (
-                    <Modal transparent visible={showDelete}>
-                        <View style={{
-                            flex: 1,
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}>
-                            <View style={{
-                                backgroundColor: Colors.background,
-                                borderRadius: 10,
-                                padding: 28,
-                                shadowColor: Colors.shadow,
-                                width: '80%',
-                            }}>
-                                <Text style={{ fontSize: 18, marginBottom: 5, alignSelf: 'center', fontWeight: 'bold' }}>Are You Sure You Want To Delete</Text>
-
-                                <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
-
-                                    <TouchableOpacity style={{
-                                        backgroundColor: Colors.primary,
-                                        borderRadius: 5,
-                                        paddingVertical: 8,
-                                        paddingHorizontal: 12,
-                                        marginTop: 10,
-                                        marginRight: 3,
-                                    }} onPress={() => {
-                                        DeleteNewsCommentIdConfirmYes();
-                                    }}>
-                                        <Text style={{ fontSize: 16, color: Colors.background }}>Yes</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={{
-                                        backgroundColor: '#f25252',
-                                        borderRadius: 5,
-                                        paddingVertical: 8,
-                                        paddingHorizontal: 12,
-                                        marginTop: 10,
-                                    }} onPress={() => {
-                                        DeleteNewsCommentIdConfirmNo();
-                                    }}>
-                                        <Text style={{ fontSize: 16, color: Colors.background }}>No</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                        </View>
-                    </Modal>
-                )}
-
-                <Modal visible={modalVisible} animationType="slide" transparent>
-                    <View style={{
-                        flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    }}>
-                        <View style={{
-                            backgroundColor: Colors.background,
-                            borderRadius: 10,
-                            padding: 20,
-                            width: '80%',
-                            marginBottom: 20,
-                        }}>
-                            <TextInput
-                                style={{
-                                    width: '100%',
-                                    height: 40,
-                                    borderWidth: 1,
-                                    borderColor: Colors.primary,
-                                    marginBottom: 10,
-                                    paddingHorizontal: 10,
-                                }}
-                                placeholder="News Comment"
-                                value={newsComment.Comment}
-                                onChangeText={(text) => setNewsComment({ ...newsComment, Comment: text })}
-                            />
-
-                            <TouchableOpacity style={{
-                                backgroundColor: Colors.primary,
-                                borderRadius: 5,
-                                paddingVertical: 10,
-                                paddingHorizontal: 20,
-                                marginBottom: 10,
-                            }} onPress={handleSaveNewsComment}>
-                                <Text style={{
-                                    color: Colors.background,
-                                    fontSize: 16,
-                                    fontWeight: 'bold',
-                                    textAlign: 'center',
-                                }}>{newsComment.NewsCommentId !== 0 ? 'Save' : 'Add'}</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: '#f25252',
-                                borderRadius: 5,
-                                paddingVertical: 10,
-                                paddingHorizontal: 20,
-                            }}
-                            onPress={handleClose}
-                        >
-                            <Text style={{
-                                color: Colors.background,
-                                fontSize: 16,
-                                fontWeight: 'bold',
-                                textAlign: 'center',
-                            }}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
-                </Modal>
-
-                <FlatList
-                    data={newsCommentList}
-                    keyExtractor={(item) => item.newsCommentId.toString()}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={(item) => <NewsCommentCard item={item} ondelete={DeleteNewsCommentIdConfirm} 
-                         onEdit={handleEditNewsComment} showDelete={setShowDelete}
-                         showModelVisible={setModalVisible} recordEmpty={setNewsCommentList}/>}
-                />
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#f25252',
+                    borderRadius: 5,
+                    paddingVertical: 8,
+                    paddingHorizontal: 12,
+                    marginTop: 10,
+                  }}
+                  onPress={() => {
+                    DeleteNewsCommentIdConfirmNo();
+                  }}>
+                  <Text style={{fontSize: 16, color: Colors.background}}>
+                    No
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-        </ScrollView>
-    );
+          </View>
+        </Modal>
+      )}
+
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          }}>
+          <View
+            style={{
+              backgroundColor: Colors.background,
+              borderRadius: 10,
+              padding: 20,
+              width: '80%',
+              marginBottom: 20,
+            }}>
+            <TextInput
+              style={{
+                width: '100%',
+                height: 40,
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                marginBottom: 10,
+                paddingHorizontal: 10,
+              }}
+              placeholder="News Comment"
+              value={newsComment.Comment}
+              onChangeText={text =>
+                setNewsComment({...newsComment, Comment: text})
+              }
+            />
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.primary,
+                borderRadius: 5,
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                marginBottom: 10,
+              }}
+              onPress={handleSaveNewsComment}>
+              <Text
+                style={{
+                  color: Colors.background,
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  textAlign: 'center',
+                }}>
+                {newsComment.NewsCommentId !== 0 ? 'Save' : 'Add'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity
+            style={{
+              backgroundColor: '#f25252',
+              borderRadius: 5,
+              paddingVertical: 10,
+              paddingHorizontal: 20,
+            }}
+            onPress={handleClose}>
+            <Text
+              style={{
+                color: Colors.background,
+                fontSize: 16,
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}>
+              Close
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </View>
+  );
 };
 
 // const styles = StyleSheet.create({

@@ -9,16 +9,16 @@ import {
   Animated,
   ActivityIndicator,
 } from 'react-native';
-import NewsPost from '../components/news';
-import SliderComponent from '../components/sliderComponent';
-import Colors from '../constants/Colors';
-import NewsCardComponent from '../components/newsCardComponent';
-import {UserContext} from '../../App';
+import NewsPost from '../../components/news';
+import SliderComponent from '../../components/sliderComponent';
+import Colors from '../../constants/Colors';
+import NewsCardComponent from '../../components/newsCardComponent';
+import {UserContext} from '../../../App';
 import {useContext} from 'react';
-import {Post as httpPost} from '../constants/httpService';
+import {Post as httpPost} from '../../constants/httpService';
 import Toast from 'react-native-toast-message';
 import {useFocusEffect} from '@react-navigation/native';
-import StudentHostelRoomBadRentScreen from './hostel';
+import HomeMenu from './HomeMenu';
 
 const HomeScreen = ({navigation}) => {
   const {user, setUser} = useContext(UserContext);
@@ -82,7 +82,27 @@ const HomeScreen = ({navigation}) => {
       GetNewsList();
     }
   };
-
+  const renderHeader = () => {
+    return (
+      <>
+        <View style={{flex: 1, alignItems: 'center'}}>
+          <SliderComponent />
+        </View>
+        <HomeMenu />
+        <Text
+          style={{
+            color: Colors.primary,
+            fontSize: 20,
+            fontWeight: 'bold',
+            marginTop: 10,
+            marginBottom: 5,
+            paddingHorizontal: 10,
+          }}>
+          Latest News
+        </Text>
+      </>
+    );
+  };
   const renderFooter = () => {
     if (!loading) return null;
     return (
@@ -91,54 +111,38 @@ const HomeScreen = ({navigation}) => {
       </View>
     );
   };
+
   return (
-    <ScrollView
-      contentContainerStyle={{flexGrow: 1}}
-      showsVerticalScrollIndicator={false}>
-      <View style={{flex: 1}}>
-        <Animated.View
-          style={{
-            flex: 1,
-            position: 'absolute',
-            top: 0,
-            padding: 16,
-            right: 0,
-            left: 0,
-            bottom: 0,
-            backgroundColor: Colors.background,
-            transform: [{scale: scale}, {translateX: moveToRight}],
-          }}>
-          <View style={{flex: 1, alignItems: 'center'}}>
-            <SliderComponent />
-          </View>
-          <Text
-            style={{
-              color: Colors.primary,
-              fontSize: 20,
-              fontWeight: 'bold',
-              marginTop: 10,
-              marginBottom: 5,
-            }}>
-            Latest News
-          </Text>
-          <FlatList
-            data={newsList}
-            keyExtractor={item => item.newsId.toString()}
-            showsVerticalScrollIndicator={false}
-            renderItem={item => (
-              <NewsCardComponent item={item} navigation={navigation} />
-            )}
-            ListFooterComponent={renderFooter}
-            onEndReached={() => {
-              handleLoadMore();
-            }}
-            onEndReachedThreshold={0.1}
-          />
-          <StudentHostelRoomBadRentScreen />
-          <Toast ref={ref => Toast.setRef(ref)} />
-        </Animated.View>
-      </View>
-    </ScrollView>
+    <View style={{flex: 1}}>
+      <Animated.View
+        style={{
+          flex: 1,
+          position: 'absolute',
+          top: 0,
+          padding: 0,
+          right: 0,
+          left: 0,
+          bottom: 0,
+          backgroundColor: Colors.background,
+          transform: [{scale: scale}, {translateX: moveToRight}],
+        }}>
+        <FlatList
+          data={newsList}
+          ListHeaderComponent={renderHeader}
+          keyExtractor={item => item.newsId.toString()}
+          showsVerticalScrollIndicator={false}
+          renderItem={item => (
+            <NewsCardComponent item={item} navigation={navigation} />
+          )}
+          ListFooterComponent={renderFooter}
+          onEndReached={() => {
+            handleLoadMore();
+          }}
+          onEndReachedThreshold={0.1}
+        />
+        <Toast ref={ref => Toast.setRef(ref)} />
+      </Animated.View>
+    </View>
   );
 };
 
