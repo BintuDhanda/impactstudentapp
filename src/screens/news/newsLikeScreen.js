@@ -1,65 +1,99 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, TextInput, FlatList, Alert, ScrollView } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TextInput,
+  FlatList,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import Colors from '../../constants/Colors';
-import { Get as httpGet, Delete as httpDelete } from '../../constants/httpService';
+import {
+  Get as httpGet,
+  Delete as httpDelete,
+} from '../../constants/httpService';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const NewsLikeScreen = ({ route }) => {
-    const { newsId } = route.params;
-    const [newsLikeList, setNewsLikeList] = useState([]);
+const NewsLikeScreen = ({route}) => {
+  const {newsId} = route.params;
+  const [newsLikeList, setNewsLikeList] = useState([]);
 
-    useEffect(() => {
-        GetNewsLikeList();
-    }, []);
-    const GetNewsLikeList = () => {
-        httpGet(`NewsLike/getNewsLikeByNewsId?NewsId=${newsId}`)
-            .then((result) => {
-                console.log(result.data)
-                setNewsLikeList(result.data)
-            })
-            .catch(err => console.log('Get News Like error :', err))
-    }
+  useEffect(() => {
+    GetNewsLikeList();
+  }, []);
+  const GetNewsLikeList = () => {
+    httpGet(`NewsLike/getNewsLikeByNewsId?NewsId=${newsId}`)
+      .then(result => {
+        console.log(result.data);
+        setNewsLikeList(result.data);
+      })
+      .catch(err => console.log('Get News Like error :', err));
+  };
 
-    const renderNewsLikeCard = ({ item }) => {
-        return (
-            <View style={{
-                flexDirection: 'row',
-                backgroundColor: Colors.background,
-                borderRadius: 10,
-                padding: 5,
-                marginBottom: 10,
-                shadowColor: Colors.primary,
-                shadowOffset: { width: 5, height: 5 },
-                shadowOpacity: 5,
-                shadowRadius: 10,
-                elevation: 10,
-                borderWidth: 1.5,
-                borderColor: "grey",
-                alignItems: 'center'
-            }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignContent: 'center' }}>
-                    <Text style={{ fontSize: 20, fontWeight: 'bold', borderRadius: 50, borderWidth: 2, borderColor: Colors.primary, color: Colors.secondary, padding: 8, marginRight: 10 }}>{item.userName}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                    <View style={{ justifyContent: 'center', alignItems: 'flex-start'}}>
-                        <Text style={{ fontSize: 16, fontWeight: 'bold', }}>{item.userMobile}</Text>
-                    </View>
-                </View>
-            </View >
-        );
-    };
-
+  const renderNewsLikeCard = ({item}) => {
     return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-            <View style={{ flex: 1, padding: 20, }}>
-                <FlatList
-                    data={newsLikeList}
-                    renderItem={renderNewsLikeCard}
-                    keyExtractor={(item) => item.newsLikeId.toString()}
-                />
-            </View>
-        </ScrollView>
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: Colors.background,
+          borderRadius: 10,
+          padding: 5,
+          marginBottom: 10,
+          shadowColor: Colors.primary,
+          shadowOffset: {width: 5, height: 5},
+          shadowOpacity: 5,
+          shadowRadius: 10,
+          elevation: 10,
+          borderWidth: 1.5,
+          borderColor: 'grey',
+          alignItems: 'center',
+        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignContent: 'center',
+          }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              borderRadius: 50,
+              borderWidth: 2,
+              borderColor: Colors.primary,
+              color: Colors.secondary,
+              padding: 8,
+              marginRight: 10,
+              width: 50,
+            }}>
+            {item.userName}
+          </Text>
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
+          <View style={{justifyContent: 'center', alignItems: 'flex-start'}}>
+            <Text style={{fontSize: 16, fontWeight: 'bold'}}>
+              {item.userMobile}
+            </Text>
+          </View>
+        </View>
+      </View>
     );
+  };
+
+  return (
+    <ScrollView contentContainerStyle={{flexGrow: 1}}>
+      <View style={{flex: 1, padding: 20}}>
+        <FlatList
+          data={newsLikeList}
+          renderItem={renderNewsLikeCard}
+          keyExtractor={item => item.newsLikeId.toString()}
+        />
+      </View>
+    </ScrollView>
+  );
 };
 
 // const styles = StyleSheet.create({
