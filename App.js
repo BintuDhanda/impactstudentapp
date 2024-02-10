@@ -30,6 +30,7 @@ import AddressScreen from './src/screens/address/studentAddressScreen';
 import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
 import StudentIdentitiesScreen from './src/screens/studentIdentities/studentIdentitiesScreen';
 import StudentHostelRoomBadRentScreen from './src/screens/hostel';
+import Academies from './src/screens/academies';
 
 let isLogedIn = true;
 
@@ -94,56 +95,68 @@ function App() {
         <UserContext.Provider value={{user, setUser}}>
           <SafeAreaView style={{flex: 1}}>
             {user ? (
-              <NavigationContainer>
-                <Stack.Navigator screenOptions={{headerShown: false}}>
-                  <Stack.Screen name="Main" component={TabNavigator} />
-                  <Stack.Screen
-                    name="NewsLikeScreen"
-                    options={{title: 'News Like', headerShown: true}}
-                    component={NewsLikeScreen}
-                  />
-                  <Stack.Screen
-                    name="NewsCommentScreen"
-                    options={{title: 'News Comment', headerShown: true}}
-                    component={NewsCommentScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentTokenFormScreen"
-                    options={{title: 'Token Form', headerShown: true}}
-                    component={StudentTokenFormScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentQualificationFormScreen"
-                    options={{title: 'Qualification Form', headerShown: true}}
-                    component={StudentQualificationFormScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentAddressFormScreen"
-                    options={{title: 'Address Form', headerShown: true}}
-                    component={StudentAddressFormScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentAddressScreen"
-                    options={{title: 'My Address', headerShown: true}}
-                    component={AddressScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentQualificationScreen"
-                    options={{title: 'My Qualifications', headerShown: true}}
-                    component={StudentQualificationScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentIdentitiesScreen"
-                    options={{title: 'My Identities', headerShown: true}}
-                    component={StudentIdentitiesScreen}
-                  />
-                  <Stack.Screen
-                    name="StudentHostelRoomBadRentScreen"
-                    options={{title: 'My Hostel', headerShown: true}}
-                    component={StudentHostelRoomBadRentScreen}
-                  />
-                </Stack.Navigator>
-              </NavigationContainer>
+              !user?.academyId ? (
+                <NavigationContainer>
+                  <Stack.Navigator screenOptions={{headerShown: true}}>
+                    <Stack.Screen
+                      name="Academies"
+                      options={{title: 'Academies'}}
+                      component={Academies}
+                    />
+                  </Stack.Navigator>
+                </NavigationContainer>
+              ) : (
+                <NavigationContainer>
+                  <Stack.Navigator screenOptions={{headerShown: false}}>
+                    <Stack.Screen name="Main" component={TabNavigator} />
+                    <Stack.Screen
+                      name="NewsLikeScreen"
+                      options={{title: 'News Like', headerShown: true}}
+                      component={NewsLikeScreen}
+                    />
+                    <Stack.Screen
+                      name="NewsCommentScreen"
+                      options={{title: 'News Comment', headerShown: true}}
+                      component={NewsCommentScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentTokenFormScreen"
+                      options={{title: 'Token Form', headerShown: true}}
+                      component={StudentTokenFormScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentQualificationFormScreen"
+                      options={{title: 'Qualification Form', headerShown: true}}
+                      component={StudentQualificationFormScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentAddressFormScreen"
+                      options={{title: 'Address Form', headerShown: true}}
+                      component={StudentAddressFormScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentAddressScreen"
+                      options={{title: 'My Address', headerShown: true}}
+                      component={AddressScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentQualificationScreen"
+                      options={{title: 'My Qualifications', headerShown: true}}
+                      component={StudentQualificationScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentIdentitiesScreen"
+                      options={{title: 'My Identities', headerShown: true}}
+                      component={StudentIdentitiesScreen}
+                    />
+                    <Stack.Screen
+                      name="StudentHostelRoomBadRentScreen"
+                      options={{title: 'My Hostel', headerShown: true}}
+                      component={StudentHostelRoomBadRentScreen}
+                    />
+                  </Stack.Navigator>
+                </NavigationContainer>
+              )
             ) : (
               <NavigationContainer>
                 <Stack.Navigator screenOptions={{headerShown: false}}>
