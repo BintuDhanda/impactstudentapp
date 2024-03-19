@@ -113,7 +113,7 @@ const HomeScreen = ({navigation}) => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <View style={{flex: 1, backgroundColor: '#f5f5f5'}}>
       <Animated.View
         style={{
           flex: 1,
@@ -123,7 +123,7 @@ const HomeScreen = ({navigation}) => {
           right: 0,
           left: 0,
           bottom: 0,
-          backgroundColor: Colors.background,
+          // backgroundColor: Colors.background,
           transform: [{scale: scale}, {translateX: moveToRight}],
         }}>
         <FlatList

@@ -38,8 +38,8 @@ const Register = ({navigation}) => {
             autoHide: true,
           });
         } else {
-          // let otp = Math.floor(1000 + Math.random() * 9000);
-          let otp = 1234;
+          let otp = Math.floor(1000 + Math.random() * 9000);
+          // let otp = 1234;
           console.log(otp, 'Otp');
           sendOTP(otp, users.UserMobile)
             .then(response => {

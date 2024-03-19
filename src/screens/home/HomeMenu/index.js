@@ -1,9 +1,11 @@
 import React from 'react';
-import {FlatList, Text, TouchableOpacity} from 'react-native';
+import {FlatList, View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {menus} from './constants';
 import {useNavigation} from '@react-navigation/native';
 import Colors from '../../../constants/Colors';
+const {width} = Dimensions.get('window');
+const numColumns = parseInt(width / 110);
 
 const HomeMenu = () => {
   const navigation = useNavigation();
@@ -12,7 +14,7 @@ const HomeMenu = () => {
       <TouchableOpacity
         onPress={() => navigation?.navigate(item?.path)}
         style={{
-          marginRight: 10,
+          marginRight: item?.marginRight || 0,
           borderRadius: 10,
           borderWidth: 0.8,
           borderColor: 'lightgray',
@@ -46,22 +48,31 @@ const HomeMenu = () => {
     );
   };
   return (
-    <FlatList
-      style={{
-        margin: 5,
-        marginTop: 10,
-        padding: 5,
-        backgroundColor: 'white',
-        elevation: 1.5,
-        borderRadius: 5,
-      }}
-      contentContainerStyle={{flexGrow: 1}}
-      data={menus}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      renderItem={renderItem}
-      keyExtractor={(_, index) => index.toString()}
-    />
+    <View style={{alignItems: 'center'}}>
+      <FlatList
+        ListHeaderComponent={
+          <View style={{margin: 5}}>
+            <Text style={{fontSize: 18, fontWeight: 'bold', color: 'black'}}>
+              Quick Actions
+            </Text>
+          </View>
+        }
+        style={{
+          padding: 10,
+          backgroundColor: 'white',
+          // elevation: 0.5,
+          borderRadius: 10,
+          width: width,
+        }}
+        contentContainerStyle={{flexGrow: 1}}
+        data={menus}
+        numColumns={numColumns}
+        ItemSeparatorComponent={<View style={{height: 10}} />}
+        showsHorizontalScrollIndicator={false}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => index.toString()}
+      />
+    </View>
   );
 };
 
