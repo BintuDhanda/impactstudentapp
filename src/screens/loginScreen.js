@@ -17,14 +17,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {UserContext} from '../../App';
 import {useContext} from 'react';
+import {PrimaryButton} from '../components/buttons';
 
 const LogIn = ({navigation}) => {
   const {user, setUser} = useContext(UserContext);
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = () => {
     // Handle login logic
+    setLoading(true);
     httpPost(`User/IsExists`, {Mobile: phone})
       .then(res => {
         if (res.data == false) {
@@ -48,8 +51,8 @@ const LogIn = ({navigation}) => {
                   visibilityTime: 2000,
                   autoHide: true,
                 });
-                let otp = Math.floor(1000 + Math.random() * 9000);
-                // let otp = 1234;
+                // let otp = Math.floor(1000 + Math.random() * 9000);
+                let otp = 1234;
                 console.log(otp, 'Otp');
                 sendOTP(otp, phone)
                   .then(res => {
@@ -130,6 +133,9 @@ const LogIn = ({navigation}) => {
           visibilityTime: 2000,
           autoHide: true,
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
     // navigation.navigate('VerifyOTP')
   };
@@ -234,19 +240,11 @@ const LogIn = ({navigation}) => {
               </Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: Colors.primary,
-              padding: 15,
-              borderRadius: 10,
-              marginBottom: 20,
-            }}
-            onPress={handleLogin}>
-            <Text style={{textAlign: 'center', fontSize: 16, color: '#fff'}}>
-              Login
-            </Text>
-          </TouchableOpacity>
+          <PrimaryButton
+            title="Login"
+            onPress={handleLogin}
+            loading={loading}
+          />
 
           <View style={{alignItems: 'center', marginBottom: 20}}>
             <TouchableOpacity onPress={handleCreateAccount}>

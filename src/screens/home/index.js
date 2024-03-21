@@ -5,10 +5,10 @@ import {
   Text,
   ScrollView,
   Image,
-  FlatList,
   Animated,
   ActivityIndicator,
 } from 'react-native';
+import {FlatList} from '../../components/flatlist';
 import NewsPost from '../../components/news';
 import SliderComponent from '../../components/sliderComponent';
 import Colors from '../../constants/Colors';
@@ -103,14 +103,6 @@ const HomeScreen = ({navigation}) => {
       </>
     );
   };
-  const renderFooter = () => {
-    if (!loading) return null;
-    return (
-      <View style={{paddingVertical: 20}}>
-        <ActivityIndicator animating size="large" />
-      </View>
-    );
-  };
 
   return (
     <View style={{flex: 1, backgroundColor: '#f5f5f5'}}>
@@ -127,14 +119,15 @@ const HomeScreen = ({navigation}) => {
           transform: [{scale: scale}, {translateX: moveToRight}],
         }}>
         <FlatList
-          data={newsList}
+          data={[]}
           ListHeaderComponent={renderHeader}
           keyExtractor={item => item.newsId.toString()}
           showsVerticalScrollIndicator={false}
           renderItem={item => (
             <NewsCardComponent item={item} navigation={navigation} />
           )}
-          ListFooterComponent={renderFooter}
+          loading={loading}
+          listFooterHeight={100}
           onEndReached={() => {
             handleLoadMore();
           }}

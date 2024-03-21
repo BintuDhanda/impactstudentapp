@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import Toast from 'react-native-toast-message';
 import {sendOTP} from '../constants/smsService';
 import {Post as httpPost} from '../constants/httpService';
+import {PrimaryButton} from '../components/buttons';
 
 const Register = ({navigation}) => {
   const [users, setUsers] = useState({
@@ -22,10 +23,12 @@ const Register = ({navigation}) => {
     UserPassword: '',
     IsActive: true,
   });
+  const [loading, setLoading] = useState(false);
   const handleLogin = () => {
     navigation.navigate('login');
   };
   const handleSendOtp = () => {
+    setLoading(true);
     httpPost('User/IsExists', {Mobile: users.UserMobile})
       .then(res => {
         console.log('User Is Exists ApI response', res.data);
@@ -38,8 +41,8 @@ const Register = ({navigation}) => {
             autoHide: true,
           });
         } else {
-          let otp = Math.floor(1000 + Math.random() * 9000);
-          // let otp = 1234;
+          // let otp = Math.floor(1000 + Math.random() * 9000);
+          let otp = 1234;
           console.log(otp, 'Otp');
           sendOTP(otp, users.UserMobile)
             .then(response => {
@@ -96,6 +99,9 @@ const Register = ({navigation}) => {
           visibilityTime: 2000,
           autoHide: true,
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -177,20 +183,12 @@ const Register = ({navigation}) => {
               secureTextEntry={true}
             />
           </View>
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor: Colors.primary,
-              padding: 15,
-              borderRadius: 10,
-              marginBottom: 20,
-            }}
-            onPress={handleSendOtp}>
-            <Text style={{textAlign: 'center', fontSize: 16, color: '#fff'}}>
-              Send OTP
-            </Text>
-          </TouchableOpacity>
 
+          <PrimaryButton
+            title="Send OTP"
+            onPress={handleSendOtp}
+            loading={loading}
+          />
           <View style={{alignItems: 'center', marginBottom: 20}}>
             <TouchableOpacity onPress={handleLogin}>
               <Text style={{marginTop: 5, color: '#1c8adb', fontSize: 16}}>
