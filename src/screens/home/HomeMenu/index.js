@@ -1,9 +1,10 @@
 import React from 'react';
-import {FlatList, View, Text, TouchableOpacity, Dimensions} from 'react-native';
+import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {menus} from './constants';
 import {useNavigation} from '@react-navigation/native';
 import Colors from '../../../constants/Colors';
+import {FlatList} from '../../../components/flatlist';
 const {width} = Dimensions.get('window');
 const numColumns = parseInt(width / 110);
 

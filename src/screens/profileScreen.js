@@ -1,389 +1,444 @@
-import React, { useEffect, useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, Image } from 'react-native';
-import { UserContext } from '../../App';
+import React, {useEffect, useContext, useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  Image,
+} from 'react-native';
+import {UserContext} from '../../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Colors from '../constants/Colors';
-import { Post as httpPost, Get as httpGet } from '../constants/httpService';
-import { News_URL } from '../constants/constant';
-import { useFocusEffect } from '@react-navigation/native';
+import {Post as httpPost, Get as httpGet} from '../constants/httpService';
+import {News_URL} from '../constants/constant';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {PrimaryButton} from '../components/buttons';
+import Toast from 'react-native-toast-message';
 
-const ProfileScreen = ({ route, navigation }) => {
+const ProfileScreen = ({route}) => {
+  const navigation = useNavigation();
+  const {user, setUser} = useContext(UserContext);
+  // const { userId, studentId } = route.params;
 
-    const { user, setUser } = useContext(UserContext);
-    // const { userId, studentId } = route.params;
+  const userId = user == null ? 0 : user.userId;
+  const [studentDetails, setStudentDetails] = useState({
+    StudentId: 0,
+    StudentImage: null,
+    FirstName: '',
+    LastName: '',
+    FatherName: '',
+    MotherName: '',
+    Gender: '',
+    StudentHeight: '',
+    StudentWeight: '',
+    BodyRemark: '',
+    UserId: userId,
+    IsActive: true,
+    CreatedAt: null,
+    CreatedBy: user == null ? 0 : user.userId,
+    LastUpdatedBy: null,
+  });
 
-    const userId = user == null ? 0 : user.userId;
-    const [studentDetails, setStudentDetails] = useState({
-        "StudentId": 0,
-        "StudentImage": null,
-        "FirstName": "",
-        "LastName": "",
-        "FatherName": "",
-        "MotherName": "",
-        "Gender": "",
-        "StudentHeight": "",
-        "StudentWeight": "",
-        "BodyRemark": "",
-        "UserId": userId,
-        "IsActive": true,
-        "CreatedAt": null,
-        "CreatedBy": user == null ? 0 : user.userId,
-        "LastUpdatedBy": null,
-    });
+  console.log(studentDetails, 'StudentDetails');
 
-    console.log(studentDetails, "StudentDetails")
+  useFocusEffect(
+    React.useCallback(() => {
+      if (studentDetails.Id !== 0) {
+        GetStudentDetailsByUserId();
+      }
+    }, []),
+  );
 
-    useFocusEffect(
-        React.useCallback(() => {
-            if (studentDetails.Id !== 0) {
-                GetStudentDetailsByUserId();
-            }
-        }, [])
-    );
+  const handleInputChange = (name, value) => {
+    setStudentDetails(prevStudentDetails => ({
+      ...prevStudentDetails,
+      [name]: value,
+    }));
+  };
+  const [showGenderDropdown, setShowGenderDropdown] = useState(false);
+  const toggleGenderDropdown = () => {
+    setShowGenderDropdown(!showGenderDropdown);
+  };
 
-    const handleInputChange = (name, value) => {
-        setStudentDetails((prevStudentDetails) => ({
-            ...prevStudentDetails,
-            [name]: value,
-        }));
-    };
-    const [showGenderDropdown, setShowGenderDropdown] = useState(false);
-    const toggleGenderDropdown = () => {
-        setShowGenderDropdown(!showGenderDropdown);
-    };
+  const selectGender = selectedGender => {
+    setStudentDetails(prevStudentDetails => ({
+      ...prevStudentDetails,
+      Gender: selectedGender,
+    }));
+    setShowGenderDropdown(false);
+  };
 
-    const selectGender = (selectedGender) => {
-        setStudentDetails((prevStudentDetails) => ({
-            ...prevStudentDetails,
-            Gender: selectedGender,
-        }));
-        setShowGenderDropdown(false);
-    };
-
-    const GetStudentDetailsByUserId = () => {
-        httpGet(`StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
-            .then((result) => {
-                console.log(result.data, "studentDetailsByUserId");
-                setStudentDetails(
-                    {
-                        StudentId: result.data.studentId ? result.data.studentId : 0,
-                        StudentImage: result.data.studentImage ? result.data.studentImage : null,
-                        FirstName: result.data.firstName ? result.data.firstName : "",
-                        LastName: result.data.lastName ? result.data.lastName : "",
-                        FatherName: result.data.fatherName ? result.data.fatherName : "",
-                        MotherName: result.data.motherName ? result.data.motherName : "",
-                        Gender: result.data.gender ? result.data.gender : "",
-                        StudentHeight: result.data.studentHeight ? result.data.studentHeight.toString() : "",
-                        StudentWeight: result.data.studentWeight ? result.data.studentWeight.toString() : "",
-                        BodyRemark: result.data.bodyRemark ? result.data.bodyRemark : "",
-                        UserId: result.data.userId ? result.data.userId : userId,
-                        IsActive: result.data.isActive ? result.data.isActive : true,
-                        CreatedAt: result.data.createdAt ? result.data.createdAt : null,
-                        CreatedBy: result.data.createdBy ? result.data.createdBy : user == null ? 0 : user.userId,
-                        LastUpdatedBy: user == null ? 0 : user.userId,
-                    }
-                );
-            })
-            .catch(err => console.error("Get Student Details By User Id Error", err));
-    };
-
-    const handleSaveStudentDetails = async () => {
-        await httpPost('StudentDetails/post', studentDetails)
-            .then((response) => {
-                if (response.status === 200) {
-                    response.data.message == null || response.data.message == "" ?
-                        Alert.alert('Success', response.data.message) :
-                        Alert.alert('Exists', response.data.message);
-                    navigation.goBack();
-                }
-            })
-            .catch(err => console.error('Student Details Add error :', err));
+  const GetStudentDetailsByUserId = () => {
+    httpGet(`StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
+      .then(result => {
+        console.log(result.data, 'studentDetailsByUserId');
+        setStudentDetails({
+          StudentId: result.data.studentId ? result.data.studentId : 0,
+          StudentImage: result.data.studentImage
+            ? result.data.studentImage
+            : null,
+          FirstName: result.data.firstName ? result.data.firstName : '',
+          LastName: result.data.lastName ? result.data.lastName : '',
+          FatherName: result.data.fatherName ? result.data.fatherName : '',
+          MotherName: result.data.motherName ? result.data.motherName : '',
+          Gender: result.data.gender ? result.data.gender : '',
+          StudentHeight: result.data.studentHeight
+            ? result.data.studentHeight.toString()
+            : '',
+          StudentWeight: result.data.studentWeight
+            ? result.data.studentWeight.toString()
+            : '',
+          BodyRemark: result.data.bodyRemark ? result.data.bodyRemark : '',
+          UserId: result.data.userId ? result.data.userId : userId,
+          IsActive: result.data.isActive ? result.data.isActive : true,
+          CreatedAt: result.data.createdAt ? result.data.createdAt : null,
+          CreatedBy: result.data.createdBy
+            ? result.data.createdBy
+            : user == null
+            ? 0
+            : user.userId,
+          LastUpdatedBy: user == null ? 0 : user.userId,
+        });
+      })
+      .catch(err => console.error('Get Student Details By User Id Error', err));
+  };
+  const [loading, setLoading] = useState(false);
+  const handleSaveStudentDetails = async () => {
+    if (Object.keys(studentDetails).some(key => !studentDetails[key])) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please fill all details',
+        position: 'bottom',
+        visibilityTime: 2000,
+        autoHide: true,
+      });
+      return;
     }
-
-    const handleLogOut = async () => {
-
-        try {
-            const savedUser = await AsyncStorage.clear();
-        } catch (error) {
-            console.log(error);
+    setLoading(true);
+    await httpPost('StudentDetails/post', studentDetails)
+      .then(response => {
+        if (response.status === 200) {
+          response.data.message == null || response.data.message == ''
+            ? Alert.alert('Success', response.data.message)
+            : Alert.alert('Exists', response.data.message);
+          navigation.goBack();
         }
-        setUser(null);
-    };
+      })
+      .catch(err => console.error('Student Details Add error :', err))
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
-    const handleCancel = () => {
-        navigation.goBack();
+  const handleLogOut = async () => {
+    try {
+      const savedUser = await AsyncStorage.clear();
+    } catch (error) {
+      console.log(error);
     }
-    return (
-        <View style={{ flex: 1, padding: 10, }}>
-            <View style={{
-                backgroundColor: Colors.background,
-                borderRadius: 8,
-                padding: 16,
-                shadowColor: Colors.shadow,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
-            }}>
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-                    <Image
-                        source={studentDetails.StudentImage == null ? require('../icons/user.png') : { uri: News_URL + studentDetails.StudentImage }}
-                        style={{ width: 100, height: 100, borderRadius: 50, marginBottom: 10 }}
-                    />
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>First Name:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.FirstName}
-                        onChangeText={(value) => handleInputChange('FirstName', value)}
-                        placeholder="Enter first name"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+    setUser(null);
+  };
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Last Name:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.LastName}
-                        onChangeText={(value) => handleInputChange('LastName', value)}
-                        placeholder="Enter last name"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <PrimaryButton
+            onPress={handleLogOut}
+            title="Logout"
+            style={{backgroundColor: 'white', width: 100, padding: 5}}
+            labelStyle={{color: '#1c8adb'}}
+          />
+        );
+      },
+    });
+  }, []);
+  return (
+    <View style={{flex: 1, padding: 10}}>
+      <View
+        style={{
+          backgroundColor: Colors.background,
+          borderRadius: 8,
+          padding: 16,
+          shadowColor: Colors.shadow,
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
+        }}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{flexGrow: 1}}
+          showsVerticalScrollIndicator={false}>
+          <Image
+            source={
+              studentDetails.StudentImage == null
+                ? require('../icons/user.png')
+                : {uri: News_URL + studentDetails.StudentImage}
+            }
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              marginBottom: 10,
+            }}
+          />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            First Name:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.FirstName}
+            onChangeText={value => handleInputChange('FirstName', value)}
+            placeholder="Enter first name"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Father Name:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.FatherName}
-                        onChangeText={(value) => handleInputChange('FatherName', value)}
-                        placeholder="Enter father name"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Last Name:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.LastName}
+            onChangeText={value => handleInputChange('LastName', value)}
+            placeholder="Enter last name"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Mother Name:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.MotherName}
-                        onChangeText={(value) => handleInputChange('MotherName', value)}
-                        placeholder="Enter mother name"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Father Name:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.FatherName}
+            onChangeText={value => handleInputChange('FatherName', value)}
+            placeholder="Enter father name"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Gender:</Text>
-                    {studentDetails.StudentId == 0 ?
-                        (<TouchableOpacity
-                            style={{
-                                borderWidth: 1,
-                                borderColor: Colors.primary,
-                                borderRadius: 5,
-                                paddingHorizontal: 10,
-                                paddingVertical: 8,
-                                marginBottom: 10,
-                                position: 'relative',
-                                zIndex: 1,
-                            }}
-                            onPress={toggleGenderDropdown}
-                        >
-                            <Text style={{ fontSize: 16, }}>{studentDetails.Gender || 'Select gender'}</Text>
-                            {showGenderDropdown && (
-                                <View style={{
-                                    position: 'absolute',
-                                    top: 40,
-                                    left: 0,
-                                    right: 0,
-                                    borderWidth: 1,
-                                    borderColor: Colors.primary,
-                                    backgroundColor: Colors.background,
-                                    borderRadius: 5,
-                                    padding: 10,
-                                    marginTop: 5,
-                                }}>
-                                    <TouchableOpacity
-                                        style={{ paddingVertical: 8, }}
-                                        onPress={() => selectGender('Male')}
-                                    >
-                                        <Text style={{ fontSize: 16, }}>Male</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={{ paddingVertical: 8, }}
-                                        onPress={() => selectGender('Female')}
-                                    >
-                                        <Text style={{ fontSize: 16, }}>Female</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={{ paddingVertical: 8, }}
-                                        onPress={() => selectGender('Other')}
-                                    >
-                                        <Text style={{ fontSize: 16, }}>Other</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        </TouchableOpacity>)
-                        : (<TextInput
-                            style={{
-                                borderWidth: 1,
-                                borderColor: Colors.primary,
-                                borderRadius: 5,
-                                paddingHorizontal: 10,
-                                paddingVertical: 8,
-                                marginBottom: 10,
-                                fontSize: 16,
-                            }}
-                            value={studentDetails.Gender}
-                            onChangeText={(value) => handleInputChange('MotherName', value)}
-                            placeholder="Enter mother name"
-                            editable={studentDetails.StudentId == 0 ? true : false}
-                        />)}
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Mother Name:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.MotherName}
+            onChangeText={value => handleInputChange('MotherName', value)}
+            placeholder="Enter mother name"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Height:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.StudentHeight}
-                        onChangeText={(value) => setStudentDetails({ ...studentDetails, StudentHeight: isNaN(parseInt(value)) ? "" : parseInt(value) })}
-                        placeholder="Enter height"
-                        keyboardType="numeric"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Gender:
+          </Text>
+          {studentDetails.StudentId == 0 ? (
+            <TouchableOpacity
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                borderRadius: 5,
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                marginBottom: 10,
+                position: 'relative',
+                zIndex: 1,
+              }}
+              onPress={toggleGenderDropdown}>
+              <Text style={{fontSize: 16}}>
+                {studentDetails.Gender || 'Select gender'}
+              </Text>
+              {showGenderDropdown && (
+                <View
+                  style={{
+                    position: 'absolute',
+                    top: 40,
+                    left: 0,
+                    right: 0,
+                    borderWidth: 1,
+                    borderColor: Colors.primary,
+                    backgroundColor: Colors.background,
+                    borderRadius: 5,
+                    padding: 10,
+                    marginTop: 5,
+                  }}>
+                  <TouchableOpacity
+                    style={{paddingVertical: 8}}
+                    onPress={() => selectGender('Male')}>
+                    <Text style={{fontSize: 16}}>Male</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{paddingVertical: 8}}
+                    onPress={() => selectGender('Female')}>
+                    <Text style={{fontSize: 16}}>Female</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={{paddingVertical: 8}}
+                    onPress={() => selectGender('Other')}>
+                    <Text style={{fontSize: 16}}>Other</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </TouchableOpacity>
+          ) : (
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                borderRadius: 5,
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                marginBottom: 10,
+                fontSize: 16,
+              }}
+              value={studentDetails.Gender}
+              onChangeText={value => handleInputChange('MotherName', value)}
+              placeholder="Enter mother name"
+              editable={studentDetails.StudentId == 0 ? true : false}
+            />
+          )}
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Weight:</Text>
-                    <TextInput
-                        style={{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }}
-                        value={studentDetails.StudentWeight}
-                        onChangeText={(value) => setStudentDetails({ ...studentDetails, StudentWeight: isNaN(parseInt(value)) ? "" : parseInt(value) })}
-                        placeholder="Enter weight"
-                        keyboardType="numeric"
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Height:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.StudentHeight}
+            onChangeText={value =>
+              setStudentDetails({
+                ...studentDetails,
+                StudentHeight: isNaN(parseInt(value)) ? '' : parseInt(value),
+              })
+            }
+            placeholder="Enter height"
+            keyboardType="numeric"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <Text style={{ fontSize: 16, marginBottom: 5, color: Colors.secondary }}>Body Remarks:</Text>
-                    <TextInput
-                        style={[{
-                            borderWidth: 1,
-                            borderColor: Colors.primary,
-                            borderRadius: 5,
-                            paddingHorizontal: 10,
-                            paddingVertical: 8,
-                            marginBottom: 10,
-                            fontSize: 16,
-                        }, { height: 80, textAlignVertical: 'top', }]}
-                        value={studentDetails.BodyRemark}
-                        onChangeText={(value) => handleInputChange('BodyRemark', value)}
-                        placeholder="Enter body remarks"
-                        multiline
-                        editable={studentDetails.StudentId == 0 ? true : false}
-                    />
-                    {studentDetails.StudentId === 0 ?
-                        <>
-                            <TouchableOpacity style={{
-                                backgroundColor: Colors.primary,
-                                padding: 10,
-                                borderRadius: 5,
-                                marginTop: 10,
-                                alignItems: 'center',
-                            }} onPress={handleSaveStudentDetails}>
-                                <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>{studentDetails.StudentId !== 0 ? "Save" : "Add"}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={{
-                                backgroundColor: '#f25252',
-                                padding: 10,
-                                borderRadius: 5,
-                                marginTop: 10,
-                                alignItems: 'center',
-                            }} onPress={handleCancel}>
-                                <Text style={{ color: Colors.background, fontSize: 16, fontWeight: 'bold', }}>Cancel</Text>
-                            </TouchableOpacity>
-                        </>
-                        : null}
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Weight:
+          </Text>
+          <TextInput
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.primary,
+              borderRadius: 5,
+              paddingHorizontal: 10,
+              paddingVertical: 8,
+              marginBottom: 10,
+              fontSize: 16,
+            }}
+            value={studentDetails.StudentWeight}
+            onChangeText={value =>
+              setStudentDetails({
+                ...studentDetails,
+                StudentWeight: isNaN(parseInt(value)) ? '' : parseInt(value),
+              })
+            }
+            placeholder="Enter weight"
+            keyboardType="numeric"
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
 
-                    <TouchableOpacity style={{
-                        backgroundColor: Colors.primary,
-                        borderRadius: 5,
-                        paddingVertical: 10,
-                        paddingHorizontal: 20,
-                        marginBottom: 20,
-                        marginTop:10
-                    }}
-                        onPress={() => navigation.navigate('StudentAddressScreen')}
-                    >
-                        <Text style={{
-                            color: Colors.background,
-                            fontSize: 14,
-                            fontWeight: 'bold',
-                            textAlign: 'center'
-                        }}>View My Address</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{
-                        backgroundColor: Colors.primary,
-                        borderRadius: 5,
-                        paddingVertical: 10,
-                        paddingHorizontal: 20,
-                        marginBottom: 20,
-                    }}
-                        onPress={() => navigation.navigate('StudentQualificationScreen')}
-                    >
-                        <Text style={{
-                            color: Colors.background,
-                            fontSize: 14,
-                            fontWeight: 'bold',
-                            textAlign: 'center'
-                        }}>View My Qualifications</Text>
-                    </TouchableOpacity>
-
-                    <View style={{ justifyContent: "center", marginTop: 10, marginBottom: 20 }}>
-                        <TouchableOpacity onPress={handleLogOut}>
-                            <Text style={{ color: '#1c8adb', fontSize: 16, alignSelf: 'center' }}>LogOut</Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </View>
-        </View>
-    );
-}
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Body Remarks:
+          </Text>
+          <TextInput
+            style={[
+              {
+                borderWidth: 1,
+                borderColor: Colors.primary,
+                borderRadius: 5,
+                paddingHorizontal: 10,
+                paddingVertical: 8,
+                marginBottom: 10,
+                fontSize: 16,
+              },
+              {height: 80, textAlignVertical: 'top'},
+            ]}
+            value={studentDetails.BodyRemark}
+            onChangeText={value => handleInputChange('BodyRemark', value)}
+            placeholder="Enter body remarks"
+            multiline
+            editable={studentDetails.StudentId == 0 ? true : false}
+          />
+          {studentDetails.StudentId === 0 ? (
+            <>
+              <PrimaryButton
+                title={studentDetails.StudentId !== 0 ? 'Save' : 'Add'}
+                onPress={handleSaveStudentDetails}
+                style={{padding: 10, borderRadius: 5}}
+                loading={loading}
+              />
+              <PrimaryButton
+                title={'Cancel'}
+                onPress={handleCancel}
+                style={{
+                  padding: 10,
+                  borderRadius: 5,
+                  backgroundColor: '#f25252',
+                }}
+              />
+            </>
+          ) : null}
+        </ScrollView>
+      </View>
+      <Toast ref={ref => Toast.setRef(ref)} />
+    </View>
+  );
+};
 
 // const styles = StyleSheet.create({
 //     container: {

@@ -3,11 +3,13 @@ import {ImageBackground, View} from 'react-native';
 import {SliderBox} from 'react-native-image-slider-box';
 import {Get as httpGet} from '../constants/httpService';
 import {News_URL} from '../constants/constant';
+import Loading from './loader';
 
 const SliderComponent = () => {
   const [images, setImages] = useState([]);
 
   useEffect(() => {
+    setImages([]);
     // Make a network request to fetch image paths from your API
     httpGet('Slider/get')
       .then(response => {
@@ -26,6 +28,7 @@ const SliderComponent = () => {
     <View style={{flex: 1}}>
       <ImageBackground source={require('../assets/impact.png')}>
         <View style={{backgroundColor: '#fffffff0'}}>
+          <Loading visible={images?.length == 0} />
           <SliderBox
             images={images.map(path => ({uri: News_URL + path.sliderImage}))}
             autoplay={true}
@@ -38,6 +41,7 @@ const SliderComponent = () => {
             inactiveDotColor="black"
             firstItem={4}
             paginationBoxVerticalPadding={10}
+            imageLoader
           />
         </View>
       </ImageBackground>

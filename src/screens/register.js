@@ -107,6 +107,7 @@ const Register = ({navigation}) => {
 
   return (
     <ScrollView
+      keyboardShouldPersistTaps="handled"
       contentContainerStyle={{flexGrow: 1, backgroundColor: Colors.background}}>
       <SafeAreaView
         style={{

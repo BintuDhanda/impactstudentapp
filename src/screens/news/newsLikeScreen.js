@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  FlatList,
   Alert,
   ScrollView,
 } from 'react-native';
@@ -16,6 +15,7 @@ import {
   Delete as httpDelete,
 } from '../../constants/httpService';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {FlatList} from '../../components/flatlist';
 
 const NewsLikeScreen = ({route}) => {
   const {newsId} = route.params;
@@ -84,7 +84,9 @@ const NewsLikeScreen = ({route}) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}}>
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{flexGrow: 1}}>
       <View style={{flex: 1, padding: 20}}>
         <FlatList
           data={newsLikeList}

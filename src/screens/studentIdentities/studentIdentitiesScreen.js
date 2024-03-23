@@ -4,7 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   ScrollView,
   Modal,
   Alert,
@@ -17,6 +16,7 @@ import Toast from 'react-native-toast-message';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {useFocusEffect} from '@react-navigation/native';
 import {Get as httpGet, Post as httpPost} from '../../constants/httpService';
+import { FlatList } from '../../components/flatlist';
 const {height} = Dimensions.get('window');
 
 const StudentIdentitiesScreen = ({route, navigation}) => {

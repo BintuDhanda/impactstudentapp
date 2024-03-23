@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   TouchableOpacity,
   Modal,
   Animated,
@@ -19,6 +18,7 @@ import {
   GetStudentIdByUserId,
 } from '../../constants/httpService';
 import {UserContext} from '../../../App';
+import { FlatList } from '../../components/flatlist';
 
 const NoficationsScreen = ({navigation}) => {
   const {user, setUser} = useContext(UserContext);

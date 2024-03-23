@@ -118,7 +118,9 @@ const RegisterVerifyOtpScreen = ({route, navigation}) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={{flexGrow: 1}}>
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{flexGrow: 1}}>
       <SafeAreaView
         style={{
           flex: 1,

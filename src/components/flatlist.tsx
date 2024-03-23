@@ -12,11 +12,15 @@ interface FlatListProps<T> extends DefaultFlatListProps<any> {
   loading?: boolean;
   emptyMessageColor?: string;
   emptyMessageText?: string;
-  listFooterHeight?: string | number;
+  listEmptyHeight?: string | number;
 }
 const {height} = Dimensions.get('window');
 export const FlatList = (props: FlatListProps<any>) => {
   const dataLength = props?.data?.length || 0;
+  let listEmptyHeight = height - 200;
+  if (props?.ListHeaderComponent) {
+    listEmptyHeight = height - 250;
+  }
   return (
     <DefaultFlatList
       refreshing={false}
@@ -36,7 +40,7 @@ export const FlatList = (props: FlatListProps<any>) => {
       ListEmptyComponent={() => (
         <View
           style={{
-            height: props?.listFooterHeight || height - 150,
+            height: props?.listEmptyHeight || listEmptyHeight,
             alignItems: 'center',
             justifyContent: 'center',
           }}>

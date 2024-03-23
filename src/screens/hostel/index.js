@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {View, Text, FlatList, ScrollView} from 'react-native';
+import {View, Text, ScrollView} from 'react-native';
 import Colors from '../../constants/Colors';
 import Toast from 'react-native-toast-message';
 import {UserContext} from '../../../App';
 import {useContext} from 'react';
 import {Get as httpGet, Post as httpPost} from '../../constants/httpService';
+import { FlatList } from '../../components/flatlist';
 
 const StudentHostelRoomBadRentScreen = () => {
   const {user, setUser} = useContext(UserContext);

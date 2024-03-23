@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Colors from '../constants/Colors';
 import HomeScreen from '../screens/home';
@@ -8,7 +8,7 @@ import StudentQualificationScreen from '../screens/qualification/studentQualific
 import StudentBatchScreen from '../screens/studentBatch/studentBatchScreen';
 import ProfileScreen from '../screens/profileScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import {ScrollView, View} from 'react-native'; // Import ScrollView
+import {ScrollView, View, Text} from 'react-native'; // Import ScrollView
 import NoficationsScreen from '../screens/notfications/notificationsScreen';
 import {getGreeting} from '../helpers';
 
@@ -37,6 +37,23 @@ function TabNavigator() {
         name="Home"
         component={HomeScreen}
         options={{
+          // headerStyle: {height: 70},
+          // headerTitle: () => (
+          //   <View style={{paddingVertical: 5}}>
+          //     <Text
+          //       style={{
+          //         fontSize: 20,
+          //         fontWeight: '500',
+          //         color: Colors?.primary,
+          //       }}>{`Hi, ${getGreeting()} !`}</Text>
+          //     <Text
+          //       style={{
+          //         fontSize: 20,
+          //         fontWeight: '500',
+          //         color: Colors?.primary,
+          //       }}>{`Hi, ${getGreeting()} !`}</Text>
+          //   </View>
+          // ),
           headerTitle: `Hi, ${getGreeting()} !`,
           headerTitleStyle: {color: Colors.primary},
           tabBarLabel: 'Home',

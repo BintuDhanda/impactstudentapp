@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  FlatList,
   Alert,
   ScrollView,
 } from 'react-native';
@@ -18,6 +17,7 @@ import {UserContext} from '../../../App';
 import {useContext} from 'react';
 import NewsCommentCard from '../../components/newsCommentCard';
 import {useFocusEffect} from '@react-navigation/native';
+import { FlatList } from '../../components/flatlist';
 
 const NewsCommentScreen = ({route}) => {
   const {newsId} = route.params;

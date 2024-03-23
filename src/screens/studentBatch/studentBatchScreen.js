@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
@@ -15,6 +14,7 @@ import {
   Get as httpGet,
   GetStudentIdByUserId,
 } from '../../constants/httpService';
+import {FlatList} from '../../components/flatlist';
 
 const StudentBatchScreen = ({navigation}) => {
   const [batchList, setBatchList] = useState([]);

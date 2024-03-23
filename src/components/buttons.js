@@ -17,11 +17,10 @@ export const PrimaryButton = (props: buttonProps) => {
       {...props}
       disabled={props?.disabled || props?.loading}
       style={{
-        flex: 1,
         backgroundColor: Colors.primary,
         padding: 15,
         borderRadius: 10,
-        marginBottom: 20,
+        marginBottom: 10,
         ...props?.style,
       }}>
       {props?.loading ? (
@@ -37,7 +36,7 @@ export const PrimaryButton = (props: buttonProps) => {
           {props?.title}
         </Text>
       ) : (
-        props?.title
+        props?.title || props?.children
       )}
     </TouchableOpacity>
   );

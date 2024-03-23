@@ -5,7 +5,6 @@ import {
   View,
   Modal,
   TextInput,
-  FlatList,
   TouchableOpacity,
   Alert,
   ScrollView,
@@ -17,6 +16,7 @@ import {
   Get as httpGet,
   GetStudentIdByUserId,
 } from '../../constants/httpService';
+import {FlatList} from '../../components/flatlist';
 
 const StudentTokenScreen = ({navigation}) => {
   const [tokenList, setTokenList] = useState([]);
@@ -30,8 +30,13 @@ const StudentTokenScreen = ({navigation}) => {
   const GetStudentTokenByStudentId = async () => {
     try {
       const studentId = await GetStudentIdByUserId();
+      const sId = studentId?.data?.studentId;
+      console.log(studentId?.data);
+      if (!sId) {
+        return;
+      }
       const response = await httpGet(
-        `StudentToken/getStudentTokenByStudentId?StudentId=${studentId.data.studentId}`,
+        `StudentToken/getStudentTokenByStudentId?StudentId=${sid}`,
       );
       console.log(response.data, 'response');
       setTokenList(response.data);
@@ -50,7 +55,7 @@ const StudentTokenScreen = ({navigation}) => {
   const handleAddStudentTokenNavigate = async () => {
     const studentIds = await GetStudentIdByUserId();
     navigation.navigate('StudentTokenFormScreen', {
-      studentId: studentIds.data.studentId,
+      studentId: studentIds?.data?.studentId,
     });
   };
 

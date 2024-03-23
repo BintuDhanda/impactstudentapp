@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  FlatList,
   TouchableOpacity,
   Modal,
   ScrollView,
@@ -16,6 +15,7 @@ import {
   Get as httpGet,
   GetStudentIdByUserId,
 } from '../../constants/httpService';
+import { FlatList } from '../../components/flatlist';
 
 const AddressScreen = ({navigation}) => {
   const [addressList, setAddressList] = useState([]);
