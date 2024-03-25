@@ -30,13 +30,13 @@ const StudentTokenScreen = ({navigation}) => {
   const GetStudentTokenByStudentId = async () => {
     try {
       const studentId = await GetStudentIdByUserId();
-      const sId = studentId?.data?.studentId;
+      const sId = studentId?.data?.id;
       console.log(studentId?.data);
       if (!sId) {
         return;
       }
       const response = await httpGet(
-        `StudentToken/getStudentTokenByStudentId?StudentId=${sid}`,
+        `StudentToken/getStudentTokenByStudentId?StudentId=${sId}`,
       );
       console.log(response.data, 'response');
       setTokenList(response.data);

@@ -1,6 +1,7 @@
 import {BASE_URL} from './constant';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {convertToForm} from '../helpers';
 
 const getUser = async () => {
   try {
@@ -30,11 +31,21 @@ const getTokenFromStorage = async () => {
 
 const headers = {
   'Content-Type': 'application/json',
+  accept: 'application/json',
   Authorization: 'Bearer ' + getTokenFromStorage(),
 };
 
-export const Post = async (EndPoint, data) => {
-  return await axios.post(BASE_URL + EndPoint, JSON.stringify(data), {headers});
+export const Post = async (EndPoint, data, type = 'application/json') => {
+  let payload = {
+    ...data,
+  };
+  // if (type == 'multipart/form-data') {
+  //   payload = convertToForm(data);
+  // }
+  return await axios.post(BASE_URL + EndPoint, payload, {
+    ...headers,
+    // 'Content-Type': type,
+  });
 };
 export const Put = async (EndPoint, data) => {
   return await axios.put(BASE_URL + EndPoint, JSON.stringify(data), {headers});

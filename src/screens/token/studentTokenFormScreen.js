@@ -44,7 +44,10 @@ const StudentTokenFormScreen = ({route, navigation}) => {
 
   const handleSaveStudentToken = async () => {
     console.log(studentToken, 'studentToken');
-    await httpPost('StudentToken/post', studentToken)
+    await httpPost('StudentToken/post', {
+      ...studentToken,
+      StudentId: studentToken?.CreatedBy,
+    })
       .then(response => {
         if (response.status === 200) {
           response.data.message == null || response.data.message == ''

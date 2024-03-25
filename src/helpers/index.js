@@ -10,3 +10,12 @@ export function getGreeting() {
     return 'Good evening';
   }
 }
+
+export const convertToForm = payload => {
+  const keys = Object.keys(payload);
+  let formData = new FormData();
+  keys.map(key => {
+    formData.append(key, payload[key]);
+  });
+  return formData;
+};

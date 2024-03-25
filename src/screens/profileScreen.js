@@ -42,8 +42,6 @@ const ProfileScreen = ({route}) => {
     LastUpdatedBy: null,
   });
 
-  console.log(studentDetails, 'StudentDetails');
-
   useFocusEffect(
     React.useCallback(() => {
       if (studentDetails.Id !== 0) {
@@ -107,7 +105,15 @@ const ProfileScreen = ({route}) => {
   };
   const [loading, setLoading] = useState(false);
   const handleSaveStudentDetails = async () => {
-    if (Object.keys(studentDetails).some(key => !studentDetails[key])) {
+    if (
+      !studentDetails?.FirstName ||
+      !studentDetails?.FatherName ||
+      !studentDetails?.MotherName ||
+      !studentDetails?.BodyRemark ||
+      !studentDetails?.StudentHeight ||
+      !studentDetails?.StudentWeight ||
+      !studentDetails?.Gender
+    ) {
       Toast.show({
         type: 'error',
         text1: 'Please fill all details',
@@ -118,7 +124,7 @@ const ProfileScreen = ({route}) => {
       return;
     }
     setLoading(true);
-    await httpPost('StudentDetails/post', studentDetails)
+    await httpPost('StudentDetails/post', studentDetails, 'multipart/form-data')
       .then(response => {
         if (response.status === 200) {
           response.data.message == null || response.data.message == ''
