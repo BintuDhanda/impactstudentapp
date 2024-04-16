@@ -51,8 +51,8 @@ const LogIn = ({navigation}) => {
                   visibilityTime: 2000,
                   autoHide: true,
                 });
-                // let otp = Math.floor(1000 + Math.random() * 9000);
-                let otp = 1234;
+                let otp = Math.floor(1000 + Math.random() * 9000);
+
                 console.log(otp, 'Otp');
                 sendOTP(otp, phone)
                   .then(res => {
