@@ -7,7 +7,8 @@ export const sendOTP = (otp, mobile) => {
   // let sid = 'IIMPCT';
   // let apiURL = `http://www.getwaysms.com/vendorsms/pushsms.aspx?user=${user}&password=${password}&msisdn=${mobile}&sid=${sid}&msg=${msg}&fl=0&gwid=2`;
   // return axios.get(apiURL);
-  return httpPost('User/SendOTP', {number: mobile, msg});
+  const smsType = 'OTPSMS';
+  return httpPost('User/SendOTP', {number: mobile, otp, type: smsType});
 };
 
 //http://www.getwaysms.com/vendorsms/pushsms.aspx?user=impactcampus&password=K9F2HDNY&msisdn=9416669174&sid=IMPHSR&msg=Dear Student, Your Registration OTP is 1234 Mobile No. 9050546000 Impact Academy, Hisar&fl=0&gwid=2
