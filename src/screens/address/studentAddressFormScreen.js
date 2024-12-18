@@ -25,6 +25,7 @@ const StudentAddressFormScreen = ({route, navigation}) => {
     CountryId: '',
     StateId: '',
     CityId: '',
+    VillageId: '',
     Pincode: '',
     StudentId: studentId,
     IsActive: true,
@@ -36,10 +37,12 @@ const StudentAddressFormScreen = ({route, navigation}) => {
   const [countryList, setCountryList] = useState([]);
   const [stateList, setStateList] = useState([]);
   const [cityList, setCityList] = useState([]);
+  const [villageList, setVillageList] = useState([]);
 
   const [countryValue, setCountryValue] = useState(null);
   const [stateValue, setStateValue] = useState(null);
   const [cityValue, setCityValue] = useState(null);
+  const [villageValue, setVillageValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
   useEffect(() => {
@@ -77,6 +80,7 @@ const StudentAddressFormScreen = ({route, navigation}) => {
           CountryId: response.data.countryId,
           StateId: response.data.stateId,
           CityId: response.data.cityId,
+          VillageId: response.data.villageId,
           Pincode: response.data.pincode,
           StudentId: response.data.studentId,
           IsActive: response.data.isActive,
@@ -165,6 +169,23 @@ const StudentAddressFormScreen = ({route, navigation}) => {
         });
       });
   };
+
+  const fetchVillageByCityId = async cityId => {
+    await httpGet(`City/getVillageByCityId?Id=${cityId}`)
+      .then(response => {
+        setVillageList(response.data);
+      })
+      .catch(error => {
+        console.error('Error Get Village By City Id', error);
+        Toast.show({
+          type: 'error',
+          text1: `${error}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+          autoHide: true,
+        });
+      });
+  };
   const handleCountrySelect = country => {
     setCountryValue(country.countryId);
     setStudentAddress({...studentAddress, CountryId: country.countryId});
@@ -178,6 +199,11 @@ const StudentAddressFormScreen = ({route, navigation}) => {
   const handleCitySelect = city => {
     setCityValue(city.cityId);
     setStudentAddress({...studentAddress, CityId: city.cityId});
+    fetchVillageByCityId(city.cityId)
+  };
+  const handleVillageSelect = village => {
+    setVillageValue(village.villageId);
+    setStudentAddress({...studentAddress, VillageIdId: village.villageId});
   };
 
   const handleSaveStudentAddress = async () => {
@@ -474,6 +500,44 @@ const StudentAddressFormScreen = ({route, navigation}) => {
             onFocus={() => setIsFocus(true)}
             onBlur={() => setIsFocus(false)}
             onChange={handleCitySelect}
+          />
+          <Text
+            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
+            Village :
+          </Text>
+          <Dropdown
+            style={[
+              {
+                height: 50,
+                borderColor: Colors.primary,
+                borderWidth: 1,
+                borderRadius: 10,
+                paddingHorizontal: 8,
+                marginBottom: 10,
+              },
+              isFocus && {borderColor: 'blue'},
+            ]}
+            placeholderStyle={{fontSize: 16}}
+            selectedTextStyle={{fontSize: 16}}
+            inputSearchStyle={{
+              height: 40,
+              fontSize: 16,
+            }}
+            iconStyle={{
+              width: 20,
+              height: 20,
+            }}
+            data={villageList}
+            search
+            maxHeight={300}
+            labelField="villageName"
+            valueField="villageId"
+            placeholder={!isFocus ? 'Select Village' : '...'}
+            searchPlaceholder="Search..."
+            value={villageValue}
+            onFocus={() => setIsFocus(true)}
+            onBlur={() => setIsFocus(false)}
+            onChange={handleVillageSelect}
           />
 
           <Text

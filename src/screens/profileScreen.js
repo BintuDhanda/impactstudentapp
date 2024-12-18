@@ -22,7 +22,8 @@ const ProfileScreen = ({route}) => {
   const navigation = useNavigation();
   const {user, setUser} = useContext(UserContext);
   // const { userId, studentId } = route.params;
-
+  const fromStack = route?.params?.stack;
+  const callback = route?.params?.callback;
   const userId = user == null ? 0 : user.userId;
   const [studentDetails, setStudentDetails] = useState({
     StudentId: 0,
@@ -32,8 +33,6 @@ const ProfileScreen = ({route}) => {
     FatherName: '',
     MotherName: '',
     Gender: '',
-    StudentHeight: '',
-    StudentWeight: '',
     BodyRemark: '',
     UserId: userId,
     IsActive: true,
@@ -72,7 +71,6 @@ const ProfileScreen = ({route}) => {
   const GetStudentDetailsByUserId = () => {
     httpGet(`StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
       .then(result => {
-        console.log(result.data, 'studentDetailsByUserId');
         setStudentDetails({
           StudentId: result.data.studentId ? result.data.studentId : 0,
           StudentImage: result.data.studentImage
@@ -83,12 +81,6 @@ const ProfileScreen = ({route}) => {
           FatherName: result.data.fatherName ? result.data.fatherName : '',
           MotherName: result.data.motherName ? result.data.motherName : '',
           Gender: result.data.gender ? result.data.gender : '',
-          StudentHeight: result.data.studentHeight
-            ? result.data.studentHeight.toString()
-            : '',
-          StudentWeight: result.data.studentWeight
-            ? result.data.studentWeight.toString()
-            : '',
           BodyRemark: result.data.bodyRemark ? result.data.bodyRemark : '',
           UserId: result.data.userId ? result.data.userId : userId,
           IsActive: result.data.isActive ? result.data.isActive : true,
@@ -110,8 +102,6 @@ const ProfileScreen = ({route}) => {
       !studentDetails?.FatherName ||
       !studentDetails?.MotherName ||
       !studentDetails?.BodyRemark ||
-      !studentDetails?.StudentHeight ||
-      !studentDetails?.StudentWeight ||
       !studentDetails?.Gender
     ) {
       Toast.show({
@@ -130,7 +120,8 @@ const ProfileScreen = ({route}) => {
           response.data.message == null || response.data.message == ''
             ? Alert.alert('Success', response.data.message)
             : Alert.alert('Exists', response.data.message);
-          navigation.goBack();
+          !fromStack && navigation.goBack();
+          callback && callback();
         }
       })
       .catch(err => console.error('Student Details Add error :', err))
@@ -149,7 +140,7 @@ const ProfileScreen = ({route}) => {
   };
 
   const handleCancel = () => {
-    navigation.goBack();
+    fromStacknavigation.goBack();
   };
   useEffect(() => {
     navigation.setOptions({
@@ -347,58 +338,6 @@ const ProfileScreen = ({route}) => {
 
           <Text
             style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
-            Height:
-          </Text>
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.primary,
-              borderRadius: 5,
-              paddingHorizontal: 10,
-              paddingVertical: 8,
-              marginBottom: 10,
-              fontSize: 16,
-            }}
-            value={studentDetails.StudentHeight}
-            onChangeText={value =>
-              setStudentDetails({
-                ...studentDetails,
-                StudentHeight: isNaN(parseInt(value)) ? '' : parseInt(value),
-              })
-            }
-            placeholder="Enter height"
-            keyboardType="numeric"
-            editable={studentDetails.StudentId == 0 ? true : false}
-          />
-
-          <Text
-            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
-            Weight:
-          </Text>
-          <TextInput
-            style={{
-              borderWidth: 1,
-              borderColor: Colors.primary,
-              borderRadius: 5,
-              paddingHorizontal: 10,
-              paddingVertical: 8,
-              marginBottom: 10,
-              fontSize: 16,
-            }}
-            value={studentDetails.StudentWeight}
-            onChangeText={value =>
-              setStudentDetails({
-                ...studentDetails,
-                StudentWeight: isNaN(parseInt(value)) ? '' : parseInt(value),
-              })
-            }
-            placeholder="Enter weight"
-            keyboardType="numeric"
-            editable={studentDetails.StudentId == 0 ? true : false}
-          />
-
-          <Text
-            style={{fontSize: 16, marginBottom: 5, color: Colors.secondary}}>
             Body Remarks:
           </Text>
           <TextInput
@@ -428,15 +367,17 @@ const ProfileScreen = ({route}) => {
                 style={{padding: 10, borderRadius: 5}}
                 loading={loading}
               />
-              <PrimaryButton
-                title={'Cancel'}
-                onPress={handleCancel}
-                style={{
-                  padding: 10,
-                  borderRadius: 5,
-                  backgroundColor: '#f25252',
-                }}
-              />
+              {!fromStack && (
+                <PrimaryButton
+                  title={'Cancel'}
+                  onPress={handleCancel}
+                  style={{
+                    padding: 10,
+                    borderRadius: 5,
+                    backgroundColor: '#f25252',
+                  }}
+                />
+              )}
             </>
           ) : null}
         </ScrollView>

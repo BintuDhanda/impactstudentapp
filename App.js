@@ -22,7 +22,6 @@ import Colors from './src/constants/Colors';
 import RegisterVerifyOtpScreen from './src/screens/registerVerifyOtpScreen';
 import NewsLikeScreen from './src/screens/news/newsLikeScreen';
 import NewsCommentScreen from './src/screens/news/newsCommentScreen';
-import StudentTokenFormScreen from './src/screens/token/studentTokenFormScreen';
 import StudentQualificationFormScreen from './src/screens/qualification/studentQualificationFormScreen';
 import StudentAddressFormScreen from './src/screens/address/studentAddressFormScreen';
 import TabNavigator from './src/navigation/TabNavigator';
@@ -30,9 +29,8 @@ import AddressScreen from './src/screens/address/studentAddressScreen';
 import StudentQualificationScreen from './src/screens/qualification/studentQualificationScreen';
 import StudentIdentitiesScreen from './src/screens/studentIdentities/studentIdentitiesScreen';
 import StudentHostelRoomBadRentScreen from './src/screens/hostel';
-import Academies from './src/screens/academies';
-
-let isLogedIn = true;
+import {Get as httpGet} from './src/constants/httpService';
+import ProfileScreen from './src/screens/profileScreen';
 
 export const UserContext = React.createContext();
 const Stack = createStackNavigator();
@@ -53,7 +51,6 @@ function App() {
       const user = await AsyncStorage.getItem('user');
       if (user !== null) {
         // We have data!!
-        console.log(user);
         setUser(JSON.parse(user));
       }
     } catch (error) {
@@ -61,6 +58,37 @@ function App() {
       console.log(error);
     }
   };
+
+  const userId = user?.userId || 0;
+  const [profileNotCompleted, setProfileNotCompleted] = useState(true);
+  const GetStudentDetailsByUserId = () => {
+    httpGet(`StudentDetails/getStudentDetailsByUserId?UserId=${userId}`)
+      .then(result => {
+        const studentDetails = result.data;
+        setProfileNotCompleted(
+          !studentDetails?.firstName ||
+            !studentDetails?.fatherName ||
+            !studentDetails?.motherName ||
+            !studentDetails?.bodyRemark ||
+            !studentDetails?.gender,
+        );
+        console.log(
+          studentDetails?.firstName,
+          studentDetails?.fatherName,
+          studentDetails?.motherName,
+          studentDetails?.bodyRemark,
+          studentDetails?.gender,
+        );
+      })
+      .catch(err => console.error('Get Student Details By User Id Error', err));
+  };
+
+  useEffect(() => {
+    if (userId) {
+      GetStudentDetailsByUserId();
+      console.log('here');
+    }
+  }, [userId]);
 
   return (
     <>
@@ -95,13 +123,17 @@ function App() {
         <UserContext.Provider value={{user, setUser}}>
           <SafeAreaView style={{flex: 1}}>
             {user ? (
-              !user?.academyId ? (
+              profileNotCompleted ? (
                 <NavigationContainer>
                   <Stack.Navigator screenOptions={{headerShown: true}}>
                     <Stack.Screen
-                      name="Academies"
-                      options={{title: 'Academies'}}
-                      component={Academies}
+                      name="StackProfile"
+                      options={{title: 'Complete your profile'}}
+                      initialParams={{
+                        stack: true,
+                        callback: GetStudentDetailsByUserId,
+                      }}
+                      component={ProfileScreen}
                     />
                   </Stack.Navigator>
                 </NavigationContainer>
@@ -118,11 +150,6 @@ function App() {
                       name="NewsCommentScreen"
                       options={{title: 'News Comment', headerShown: true}}
                       component={NewsCommentScreen}
-                    />
-                    <Stack.Screen
-                      name="StudentTokenFormScreen"
-                      options={{title: 'Token Form', headerShown: true}}
-                      component={StudentTokenFormScreen}
                     />
                     <Stack.Screen
                       name="StudentQualificationFormScreen"

@@ -2,7 +2,6 @@ import React, {useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Colors from '../constants/Colors';
 import HomeScreen from '../screens/home';
-import StudentTokenScreen from '../screens/token/studentTokenScreen';
 import AddressScreen from '../screens/address/studentAddressScreen';
 import StudentQualificationScreen from '../screens/qualification/studentQualificationScreen';
 import StudentBatchScreen from '../screens/studentBatch/studentBatchScreen';
@@ -60,17 +59,6 @@ function TabNavigator() {
           tabBarLabelStyle: {fontSize: 15},
           tabBarIcon: ({color, size}) => (
             <Icon name="home" color={Colors.primary} size={25} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="Tokens"
-        component={StudentTokenScreen}
-        options={{
-          tabBarLabel: 'Tokens',
-          tabBarLabelStyle: {fontSize: 15},
-          tabBarIcon: ({color, size}) => (
-            <Icon name="certificate" color={Colors.primary} size={25} />
           ),
         }}
       />
