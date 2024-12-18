@@ -15,7 +15,7 @@ import {
   Get as httpGet,
   GetStudentIdByUserId,
 } from '../../constants/httpService';
-import { FlatList } from '../../components/flatlist';
+import {FlatList} from '../../components/flatlist';
 
 const AddressScreen = ({navigation}) => {
   const [addressList, setAddressList] = useState([]);
@@ -140,6 +140,12 @@ const AddressScreen = ({navigation}) => {
         </Text>
       </View>
       <View style={{flexDirection: 'row'}}>
+        <Text style={{fontSize: 16}}>City : </Text>
+        <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
+          {item.village}
+        </Text>
+      </View>
+      <View style={{flexDirection: 'row'}}>
         <Text style={{fontSize: 16}}>Pincode : </Text>
         <Text style={{fontSize: 16, fontWeight: 'bold', marginBottom: 8}}>
           {item.pincode}
@@ -162,20 +168,25 @@ const AddressScreen = ({navigation}) => {
         padding: 16,
         justifyContent: 'center',
       }}>
-      {/* <TouchableOpacity style={{
+      <TouchableOpacity
+        style={{
           backgroundColor: Colors.primary,
           borderRadius: 5,
           paddingVertical: 10,
           paddingHorizontal: 20,
           marginBottom: 20,
-        }} onPress={handleAddAddressNavigate}>
-          <Text style={{
+        }}
+        onPress={handleAddAddressNavigate}>
+        <Text
+          style={{
             color: Colors.background,
             fontSize: 14,
             fontWeight: 'bold',
-            textAlign: 'center'
-          }}>Add Address</Text>
-        </TouchableOpacity> */}
+            textAlign: 'center',
+          }}>
+          Add Address
+        </Text>
+      </TouchableOpacity>
 
       {showDelete && (
         <Modal transparent visible={showDelete}>
